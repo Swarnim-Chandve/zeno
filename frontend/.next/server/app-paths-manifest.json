@@ -1,3 +1,8 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/duel/route": "app/api/duel/route.js",
+  "/api/match/route": "app/api/match/route.js",
+  "/api/online-players/route": "app/api/online-players/route.js",
+  "/api/test/route": "app/api/test/route.js",
   "/page": "app/page.js"
 }
