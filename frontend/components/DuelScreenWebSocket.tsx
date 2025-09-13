@@ -236,7 +236,8 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     return questions[currentQuestionIndex] || null
   }
 
-  const getPlayerScore = (playerAddress: string) => {
+  const getPlayerScore = (playerAddress: string | undefined) => {
+    if (!playerAddress) return 0
     const player = players.find(p => p.address === playerAddress)
     return player ? player.score : 0
   }
