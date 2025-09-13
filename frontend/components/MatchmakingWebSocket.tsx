@@ -26,8 +26,93 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
   const [lobbyId, setLobbyId] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [mode, setMode] = useState<'create' | 'join'>('create')
+  const [joinLobbyId, setJoinLobbyId] = useState('')
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
+
+  // Join lobby function
+  const joinLobby = async () => {
+    const currentAddress = isDemoMode ? playerAddress : address
+    if (!currentAddress) return
+
+    const playerId = playerIdRef.current || `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    playerIdRef.current = playerId
+
+    try {
+      const response = await fetch(`/api/websocket?action=join-lobby&playerId=${playerId}&playerAddress=${currentAddress}&lobbyId=${joinLobbyId}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const text = await response.text()
+      let data
+      
+      try {
+        data = JSON.parse(text)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError)
+        console.error('Response text:', text)
+        throw new Error('Invalid JSON response from server')
+      }
+      
+      if (data.type === 'player_joined') {
+        setLobbyId(joinLobbyId)
+        setMatchId(joinLobbyId)
+        setStatus('waiting')
+        
+        // Start polling for game start
+        const pollForGameStart = async () => {
+          try {
+            const statusResponse = await fetch(`/api/websocket?action=get-lobby-status&lobbyId=${joinLobbyId}`)
+            
+            if (!statusResponse.ok) {
+              throw new Error(`HTTP error! status: ${statusResponse.status}`)
+            }
+            
+            const statusText = await statusResponse.text()
+            let statusData
+            
+            try {
+              statusData = JSON.parse(statusText)
+            } catch (parseError) {
+              console.error('JSON parse error in polling:', parseError)
+              console.error('Response text:', statusText)
+              throw new Error('Invalid JSON response from server')
+            }
+            
+            if (statusData.status === 'playing') {
+              setStatus('found')
+              onMatchFound({
+                matchId: joinLobbyId,
+                status: 'ready',
+                players: statusData.players,
+                playerAddress: currentAddress
+              })
+            } else {
+              // Continue polling
+              setTimeout(pollForGameStart, 1000)
+            }
+          } catch (error) {
+            console.error('Error polling for game start:', error)
+            setStatus('error')
+            setError(`Failed to check game status: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          }
+        }
+        
+        // Start polling after a short delay
+        setTimeout(pollForGameStart, 1000)
+      } else if (data.error) {
+        setStatus('error')
+        setError(data.error)
+      }
+    } catch (error) {
+      console.error('Error joining lobby:', error)
+      setStatus('error')
+      setError(`Failed to join lobby: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
 
   // WebSocket/API connection
   useEffect(() => {
@@ -134,8 +219,13 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
           }
         }
       }
+
       
-      createLobby()
+      if (mode === 'create') {
+        createLobby()
+      } else if (mode === 'join' && joinLobbyId) {
+        joinLobby()
+      }
       return
     }
     
@@ -319,6 +409,57 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
           {totalOnline > 0 && (
             <div className="mt-2 text-sm text-white/70">
               {waitingPlayers.length} waiting for match
+            </div>
+          )}
+        </div>
+
+        {/* Mode Toggle */}
+        <div className="bg-white/10 rounded-lg p-4 mb-6">
+          <div className="flex space-x-2 mb-4">
+            <button
+              onClick={() => setMode('create')}
+              className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                mode === 'create' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-white/20 text-white/70 hover:bg-white/30'
+              }`}
+            >
+              Create Lobby
+            </button>
+            <button
+              onClick={() => setMode('join')}
+              className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                mode === 'join' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-white/20 text-white/70 hover:bg-white/30'
+              }`}
+            >
+              Join Lobby
+            </button>
+          </div>
+          
+          {mode === 'join' && (
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Enter Lobby ID"
+                value={joinLobbyId}
+                onChange={(e) => setJoinLobbyId(e.target.value)}
+                className="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-blue-400"
+              />
+              <button
+                onClick={() => {
+                  if (joinLobbyId.trim()) {
+                    setStatus('connecting')
+                    setError(null)
+                    joinLobby()
+                  }
+                }}
+                disabled={!joinLobbyId.trim() || status === 'connecting'}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                Join Lobby
+              </button>
             </div>
           )}
         </div>

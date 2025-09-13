@@ -71,21 +71,21 @@ export async function GET(request: NextRequest) {
     const lobbyId = searchParams.get('lobbyId')
     
     if (!playerId || !playerAddress || !lobbyId) {
-      return Response.json({ error: 'Missing required parameters' }, { status: 400 })
+      return Response.json({ error: 'Missing required parameters' }, { status: 400, headers })
     }
     
     if (!global.lobbies || !global.lobbies.has(lobbyId)) {
-      return Response.json({ error: 'Lobby not found' }, { status: 404 })
+      return Response.json({ error: 'Lobby not found' }, { status: 404, headers })
     }
     
     const lobby = global.lobbies?.get(lobbyId)
     
     if (lobby.players.length >= 2) {
-      return Response.json({ error: 'Lobby is full' }, { status: 400 })
+      return Response.json({ error: 'Lobby is full' }, { status: 400, headers })
     }
     
     if (lobby.players.includes(playerId)) {
-      return Response.json({ error: 'Player already in lobby' }, { status: 400 })
+      return Response.json({ error: 'Player already in lobby' }, { status: 400, headers })
     }
     
     // Add player to lobby
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
     const lobbyId = searchParams.get('lobbyId')
     
     if (!lobbyId || !global.lobbies || !global.lobbies.has(lobbyId)) {
-      return Response.json({ error: 'Lobby not found' }, { status: 404 })
+      return Response.json({ error: 'Lobby not found' }, { status: 404, headers })
     }
     
     const lobby = global.lobbies?.get(lobbyId)
@@ -141,20 +141,20 @@ export async function GET(request: NextRequest) {
     const lobbyId = searchParams.get('lobbyId')
     
     if (!playerId || !lobbyId || !global.lobbies || !global.lobbies.has(lobbyId)) {
-      return Response.json({ error: 'Invalid parameters' }, { status: 400 })
+      return Response.json({ error: 'Invalid parameters' }, { status: 400, headers })
     }
     
     const lobby = global.lobbies?.get(lobbyId)
     const player = global.players?.get(playerId)
     
     if (!player) {
-      return Response.json({ error: 'Player not found' }, { status: 404 })
+      return Response.json({ error: 'Player not found' }, { status: 404, headers })
     }
     
     // Check if answer is correct
     const question = lobby.questions.find((q: any) => q.id === questionId)
     if (!question) {
-      return Response.json({ error: 'Question not found' }, { status: 404 })
+      return Response.json({ error: 'Question not found' }, { status: 404, headers })
     }
     
     const isCorrect = answer === question.answer
@@ -185,13 +185,13 @@ export async function GET(request: NextRequest) {
     const lobbyId = searchParams.get('lobbyId')
     
     if (!lobbyId || !global.lobbies || !global.lobbies.has(lobbyId)) {
-      return Response.json({ error: 'Lobby not found' }, { status: 404 })
+      return Response.json({ error: 'Lobby not found' }, { status: 404, headers })
     }
     
     const lobby = global.lobbies?.get(lobbyId)
     
     if (lobby.players.length !== 2) {
-      return Response.json({ error: 'Need exactly 2 players to start' }, { status: 400 })
+      return Response.json({ error: 'Need exactly 2 players to start' }, { status: 400, headers })
     }
     
     // Generate better math questions with varying difficulty
@@ -287,7 +287,7 @@ export async function GET(request: NextRequest) {
     })
   }
   
-  return Response.json({ error: 'Invalid action' }, { status: 400 })
+  return Response.json({ error: 'Invalid action' }, { status: 400, headers })
   } catch (error) {
     console.error('WebSocket API error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
@@ -315,7 +315,7 @@ export async function POST(request: NextRequest) {
       const { playerId, playerAddress } = params
       
       if (!playerId || !playerAddress) {
-        return Response.json({ error: 'Missing required parameters' }, { status: 400 })
+        return Response.json({ error: 'Missing required parameters' }, { status: 400, headers })
       }
       
       const lobbyId = `lobby_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -349,8 +349,8 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    return Response.json({ error: 'Invalid action' }, { status: 400 })
+    return Response.json({ error: 'Invalid action' }, { status: 400, headers })
   } catch (error) {
-    return Response.json({ error: 'Invalid JSON' }, { status: 400 })
+    return Response.json({ error: 'Invalid JSON' }, { status: 400, headers })
   }
 }
