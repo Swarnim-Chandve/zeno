@@ -22,50 +22,14 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
   const [matchId, setMatchId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [waitingPlayers, setWaitingPlayers] = useState<WaitingPlayer[]>([])
-  const [ws, setWs] = useState<WebSocket | null>(null)
-  const wsRef = useRef<WebSocket | null>(null)
+  // WebSocket removed - using API polling only
 
   useEffect(() => {
     const currentAddress = isDemoMode ? playerAddress : address
     if (!currentAddress) return
 
-    // For deployed version, disable WebSocket and use polling only
-    const useWebSocket = false // Disable WebSocket for production
-    let websocket: WebSocket | null = null
-    
-    if (useWebSocket) {
-      websocket = new WebSocket(wsUrl)
-      websocket.onopen = () => {
-        if (websocket) {
-          websocket.send(JSON.stringify({
-            type: 'join_matchmaking',
-            playerAddress: currentAddress
-          }))
-        }
-      }
-
-      websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        
-        if (data.type === 'matchmaking_update') {
-          setWaitingPlayers(data.waitingPlayers || [])
-          setStatus('waiting')
-        } else if (data.type === 'match_found') {
-          setStatus('found')
-          onMatchFound({ ...data, playerAddress: currentAddress })
-        } else if (data.type === 'opponent_joined') {
-          setStatus('found')
-          onMatchFound({ ...data, playerAddress: currentAddress })
-        }
-      }
-
-      websocket.onclose = () => {
-        console.log('WebSocket connection closed')
-      }
-    }
-
-    wsRef.current = websocket
-    setWs(websocket)
+    // For deployed version, use polling only (WebSocket disabled)
+    // No WebSocket setup needed
 
     const findMatch = async () => {
       try {
@@ -99,28 +63,22 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     findMatch()
 
     // Polling for deployed version
-    let pollInterval = null
-    if (!useWebSocket) {
-      pollInterval = setInterval(async () => {
-        try {
-          const response = await fetch(`/api/match?matchId=${matchId}`)
-          if (response.ok) {
-            const data = await response.json()
-            if (data.status === 'ready') {
-              setStatus('found')
-              onMatchFound({ ...data, playerAddress: currentAddress })
-            }
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/match?matchId=${matchId}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.status === 'ready') {
+            setStatus('found')
+            onMatchFound({ ...data, playerAddress: currentAddress })
           }
-        } catch (err) {
-          console.log('Polling error:', err)
         }
-      }, 2000)
-    }
+      } catch (err) {
+        console.log('Polling error:', err)
+      }
+    }, 2000)
 
     return () => {
-      if (websocket) {
-        websocket.close()
-      }
       if (pollInterval) {
         clearInterval(pollInterval)
       }
