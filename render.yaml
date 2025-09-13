@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: math-duel-backend
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: CONTRACT_ADDRESS
+        value: 0x084b724ddF750f05b0d36beD6cc7EB5147a239Cd
+      - key: TOKEN_ADDRESS
+        value: 0x3C7b30dcbe935233344656c1BA7E53952E5288C9
+      - key: CHAIN_ID
+        value: 43113
+      - key: NETWORK
+        value: fuji
+      - key: PORT
+        value: 3001

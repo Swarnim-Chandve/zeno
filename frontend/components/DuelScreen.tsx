@@ -41,59 +41,69 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
     const currentAddress = isDemoMode ? match.playerAddress : address
     if (!currentAddress) return
 
-    // Connect to WebSocket
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
-    const wsUrl = backendUrl.replace('http', 'ws').replace('https', 'wss')
-    const websocket = new WebSocket(wsUrl)
-    websocket.onopen = () => {
-      websocket.send(JSON.stringify({
-        type: 'join',
-        playerAddress: currentAddress
-      }))
-    }
+    // Start the duel using API
+    const startDuel = async () => {
+      try {
+        const response = await fetch('/api/duel', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            matchId: match.matchId,
+            playerAddress: currentAddress,
+            action: 'start'
+          }),
+        })
 
-    websocket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      
-      if (data.type === 'questions') {
-        setQuestions(data.questions)
-        setTimeLeft(30)
-        startTimer()
-        
-        // Initialize players
-        const currentAddress = isDemoMode ? match.playerAddress : address
-        const opponentAddress = match.players.find((p: string) => p !== currentAddress)
-        setPlayers([
-          { address: currentAddress, answers: [], currentQuestion: 0, isSubmitted: false },
-          { address: opponentAddress, answers: [], currentQuestion: 0, isSubmitted: false }
-        ])
-      } else if (data.type === 'opponent_progress') {
-        setOpponentProgress(data.currentQuestion)
-      } else if (data.type === 'opponent_answer') {
-        // Update opponent's progress
-        setPlayers(prev => prev.map(player => 
-          player.address === data.playerAddress 
-            ? { ...player, answers: [...player.answers, data.answer], currentQuestion: data.currentQuestion }
-            : player
-        ))
-      } else if (data.type === 'match_completed') {
-        onComplete(data)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.questions) {
+            setQuestions(data.questions)
+            setTimeLeft(30)
+            startTimer()
+            
+            // Initialize players
+            const opponentAddress = match.players.find((p: string) => p !== currentAddress)
+            setPlayers([
+              { address: currentAddress, answers: [], currentQuestion: 0, isSubmitted: false },
+              { address: opponentAddress, answers: [], currentQuestion: 0, isSubmitted: false }
+            ])
+          }
+        }
+      } catch (err) {
+        console.error('Error starting duel:', err)
       }
     }
 
-    setWs(websocket)
+    startDuel()
 
-    // Start the duel
-    setTimeout(() => {
-      websocket.send(JSON.stringify({
-        type: 'start_duel',
-        matchId: match.matchId,
-        playerAddress: currentAddress
-      }))
-    }, 1000)
+    // Polling for opponent progress in deployed version
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/duel?matchId=${match.matchId}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.answers) {
+            // Update opponent progress
+            const opponentAddress = match.players.find((p: string) => p !== currentAddress)
+            if (opponentAddress && data.answers[opponentAddress]) {
+              const opponentAnswers = data.answers[opponentAddress]
+              setPlayers(prev => prev.map(player => 
+                player.address === opponentAddress 
+                  ? { ...player, answers: opponentAnswers.map(a => a.answer), currentQuestion: opponentAnswers.length }
+                  : player
+              ))
+            }
+          }
+        }
+      } catch (err) {
+        console.log('Polling error:', err)
+      }
+    }, 2000)
 
     return () => {
-      websocket.close()
+      clearInterval(pollInterval)
     }
   }, [address, match.matchId, onComplete, isDemoMode, match.playerAddress])
 
@@ -125,15 +135,27 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
 
     const currentAddress = isDemoMode ? match.playerAddress : address
 
-    // Send answer to server
-    ws.send(JSON.stringify({
-      type: 'submit_answer',
-      playerAddress: currentAddress,
-      matchId: match.matchId,
-      answer: answer,
-      questionId: questions[currentQuestion]?.id,
-      currentQuestion: currentQuestion
-    }))
+    // Send answer to server via API
+    fetch('/api/duel', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        matchId: match.matchId,
+        playerAddress: currentAddress,
+        action: 'submit',
+        answer: answer,
+        questionId: questions[currentQuestion]?.id,
+        currentQuestion: currentQuestion
+      }),
+    }).then(response => response.json()).then(data => {
+      if (data.match_completed) {
+        onComplete(data)
+      }
+    }).catch(err => {
+      console.error('Error submitting answer:', err)
+    })
 
     // Update local player state
     setPlayers(prev => prev.map(player => 

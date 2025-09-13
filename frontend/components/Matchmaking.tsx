@@ -32,31 +32,38 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     // Connect to WebSocket for real-time updates
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
     const wsUrl = backendUrl.replace('http', 'ws').replace('https', 'wss')
-    const websocket = new WebSocket(wsUrl)
-    websocket.onopen = () => {
-      websocket.send(JSON.stringify({
-        type: 'join_matchmaking',
-        playerAddress: currentAddress
-      }))
-    }
-
-    websocket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      
-      if (data.type === 'matchmaking_update') {
-        setWaitingPlayers(data.waitingPlayers || [])
-        setStatus('waiting')
-      } else if (data.type === 'match_found') {
-        setStatus('found')
-        onMatchFound({ ...data, playerAddress: currentAddress })
-      } else if (data.type === 'opponent_joined') {
-        setStatus('found')
-        onMatchFound({ ...data, playerAddress: currentAddress })
+    
+    // For now, use polling instead of WebSocket for deployed version
+    const useWebSocket = backendUrl.includes('localhost')
+    let websocket = null
+    
+    if (useWebSocket) {
+      websocket = new WebSocket(wsUrl)
+      websocket.onopen = () => {
+        websocket.send(JSON.stringify({
+          type: 'join_matchmaking',
+          playerAddress: currentAddress
+        }))
       }
-    }
 
-    websocket.onclose = () => {
-      console.log('WebSocket connection closed')
+      websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data)
+        
+        if (data.type === 'matchmaking_update') {
+          setWaitingPlayers(data.waitingPlayers || [])
+          setStatus('waiting')
+        } else if (data.type === 'match_found') {
+          setStatus('found')
+          onMatchFound({ ...data, playerAddress: currentAddress })
+        } else if (data.type === 'opponent_joined') {
+          setStatus('found')
+          onMatchFound({ ...data, playerAddress: currentAddress })
+        }
+      }
+
+      websocket.onclose = () => {
+        console.log('WebSocket connection closed')
+      }
     }
 
     wsRef.current = websocket
@@ -64,7 +71,7 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
 
     const findMatch = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/match`, {
+        const response = await fetch('/api/match', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -93,8 +100,32 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
 
     findMatch()
 
+    // Polling for deployed version
+    let pollInterval = null
+    if (!useWebSocket) {
+      pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/match?matchId=${matchId}`)
+          if (response.ok) {
+            const data = await response.json()
+            if (data.status === 'ready') {
+              setStatus('found')
+              onMatchFound({ ...data, playerAddress: currentAddress })
+            }
+          }
+        } catch (err) {
+          console.log('Polling error:', err)
+        }
+      }, 2000)
+    }
+
     return () => {
-      websocket.close()
+      if (websocket) {
+        websocket.close()
+      }
+      if (pollInterval) {
+        clearInterval(pollInterval)
+      }
     }
   }, [address, onMatchFound, isDemoMode, playerAddress])
 
