@@ -55,36 +55,69 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const currentAddress = isDemoMode ? match.playerAddress : address
 
-  // WebSocket connection
+  // WebSocket/API connection
   useEffect(() => {
     if (!currentAddress) return
 
-    const wsUrl = process.env.NODE_ENV === 'production' 
-      ? null // Disable WebSocket in production for now
+    const isProduction = process.env.NODE_ENV === 'production'
+    const wsUrl = isProduction 
+      ? null // Use API instead of WebSocket in production
       : 'ws://localhost:3004'
 
     console.log('Connecting to WebSocket for duel:', wsUrl)
     
-    // If no WebSocket URL (production), simulate game
-    if (!wsUrl) {
-      console.log('WebSocket disabled in production, using simulation')
+    // If production, use API-based system
+    if (isProduction) {
+      console.log('Using production API system for duel')
       setWsConnected(true)
       setGameStatus('playing')
       
-      // Generate mock questions
-      const mockQuestions = [
-        { id: 0, question: "5 + 3", answer: 8, timeLimit: 30 },
-        { id: 1, question: "12 - 7", answer: 5, timeLimit: 30 },
-        { id: 2, question: "4 × 6", answer: 24, timeLimit: 30 },
-        { id: 3, question: "18 ÷ 2", answer: 9, timeLimit: 30 },
-        { id: 4, question: "9 + 11", answer: 20, timeLimit: 30 }
-      ]
-      setQuestions(mockQuestions)
-      setPlayers([
-        { id: currentAddress, address: currentAddress, score: 0, answers: [] },
-        { id: 'opponent', address: 'opponent', score: 0, answers: [] }
-      ])
+      // Start game using API
+      const startGame = async () => {
+        try {
+          const response = await fetch(`/api/websocket?action=start-game&lobbyId=${match.matchId}`)
+          const data = await response.json()
+          
+          if (data.type === 'game_started') {
+            setQuestions(data.questions)
+            setPlayers([
+              { id: currentAddress, address: currentAddress, score: 0, answers: [] },
+              { id: 'opponent', address: 'opponent', score: 0, answers: [] }
+            ])
+          } else {
+            // Fallback to mock questions if API fails
+            const mockQuestions = [
+              { id: 0, question: "5 + 3", answer: 8, timeLimit: 30 },
+              { id: 1, question: "12 - 7", answer: 5, timeLimit: 30 },
+              { id: 2, question: "4 × 6", answer: 24, timeLimit: 30 },
+              { id: 3, question: "18 ÷ 2", answer: 9, timeLimit: 30 },
+              { id: 4, question: "9 + 11", answer: 20, timeLimit: 30 }
+            ]
+            setQuestions(mockQuestions)
+            setPlayers([
+              { id: currentAddress, address: currentAddress, score: 0, answers: [] },
+              { id: 'opponent', address: 'opponent', score: 0, answers: [] }
+            ])
+          }
+        } catch (error) {
+          console.error('Error starting game:', error)
+          // Fallback to mock questions
+          const mockQuestions = [
+            { id: 0, question: "5 + 3", answer: 8, timeLimit: 30 },
+            { id: 1, question: "12 - 7", answer: 5, timeLimit: 30 },
+            { id: 2, question: "4 × 6", answer: 24, timeLimit: 30 },
+            { id: 3, question: "18 ÷ 2", answer: 9, timeLimit: 30 },
+            { id: 4, question: "9 + 11", answer: 20, timeLimit: 30 }
+          ]
+          setQuestions(mockQuestions)
+          setPlayers([
+            { id: currentAddress, address: currentAddress, score: 0, answers: [] },
+            { id: 'opponent', address: 'opponent', score: 0, answers: [] }
+          ])
+        }
+      }
       
+      startGame()
       return
     }
     
@@ -272,7 +305,18 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     }
 
     // Send answer to server
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+    if (process.env.NODE_ENV === 'production') {
+      // Use API in production
+      fetch(`/api/websocket?action=submit-answer&playerId=${currentAddress}&questionId=${question.id}&answer=${answerNum}&lobbyId=${match.matchId}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log('Answer submitted via API:', data)
+        })
+        .catch(error => {
+          console.error('Error submitting answer:', error)
+        })
+    } else if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      // Use WebSocket in development
       wsRef.current.send(JSON.stringify({
         type: 'submit_answer',
         playerId: currentAddress,

@@ -27,15 +27,37 @@ export default function RootLayout({
               (function() {
                 if (typeof window === 'undefined') return;
                 
+                // Store original methods
                 const originalDefineProperty = Object.defineProperty;
+                const originalDefineProperties = Object.defineProperties;
+                
+                // Enhanced protection
                 Object.defineProperty = function(obj, prop, descriptor) {
-                  if (prop === 'ethereum' && obj === window && window.ethereum) {
-                    console.log('Blocking ethereum redefinition');
-                    return obj;
+                  if (prop === 'ethereum' && obj === window) {
+                    if (window.ethereum) {
+                      console.log('Blocking ethereum redefinition in head script');
+                      return obj;
+                    }
                   }
                   try {
                     return originalDefineProperty.call(this, obj, prop, descriptor);
                   } catch (error) {
+                    console.warn('Property redefinition failed:', prop, error.message);
+                    return obj;
+                  }
+                };
+                
+                Object.defineProperties = function(obj, props) {
+                  if (obj === window && props && props.ethereum) {
+                    if (window.ethereum) {
+                      console.log('Blocking ethereum redefinition via defineProperties in head script');
+                      return obj;
+                    }
+                  }
+                  try {
+                    return originalDefineProperties.call(this, obj, props);
+                  } catch (error) {
+                    console.warn('Properties redefinition failed:', error.message);
                     return obj;
                   }
                 };
@@ -49,7 +71,10 @@ export default function RootLayout({
                       enumerable: true,
                       configurable: false
                     });
-                  } catch (e) {}
+                    console.log('Ethereum property protected in head script');
+                  } catch (e) {
+                    console.log('Ethereum property already protected in head script');
+                  }
                 }
               })();
             `,

@@ -28,6 +28,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     // Handle specific React errors
     if (error.message.includes('Minified React error #310')) {
       console.error('React error #310: useEffect called during render. This is likely due to wallet injection issues.')
+      
+      // Try to recover by reloading after a delay
+      setTimeout(() => {
+        console.log('Attempting to recover from React error #310...')
+        window.location.reload()
+      }, 2000)
+    }
+    
+    // Handle ethereum property errors
+    if (error.message.includes('Cannot redefine property: ethereum')) {
+      console.error('Ethereum property redefinition error detected. This should be handled by our protection script.')
+    }
+    
+    // Handle wallet connection errors
+    if (error.message.includes('wallet') || error.message.includes('ethereum')) {
+      console.error('Wallet-related error detected:', error.message)
     }
   }
 

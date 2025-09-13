@@ -28,7 +28,7 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
 
-  // WebSocket connection
+  // WebSocket/API connection
   useEffect(() => {
     const currentAddress = isDemoMode ? playerAddress : address
     if (!currentAddress) return
@@ -36,34 +36,67 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
     const playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     playerIdRef.current = playerId
 
-    // For production, use a fallback since WebSocket server isn't deployed
-    // In production, we'll use a simple polling-based system
-    const wsUrl = process.env.NODE_ENV === 'production' 
-      ? null // Disable WebSocket in production for now
+    // Use production API for WebSocket functionality
+    const isProduction = process.env.NODE_ENV === 'production'
+    const wsUrl = isProduction 
+      ? null // Use API instead of WebSocket in production
       : 'ws://localhost:3004'
 
     console.log('Connecting to WebSocket:', wsUrl)
     
-    // If no WebSocket URL (production), use polling-based system
-    if (!wsUrl) {
-      console.log('WebSocket disabled in production, using polling system')
+    // If production, use API-based system
+    if (isProduction) {
+      console.log('Using production API system')
       setIsConnected(true)
       setStatus('searching')
       
-      // Simulate finding a match after a delay
-      setTimeout(() => {
-        const mockMatchId = `match_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        setLobbyId(mockMatchId)
-        setMatchId(mockMatchId)
-        setStatus('found')
-        onMatchFound({
-          matchId: mockMatchId,
-          status: 'ready',
-          players: [currentAddress, 'opponent'],
-          playerAddress: currentAddress
-        })
-      }, 2000)
+      // Create lobby using API
+      const createLobby = async () => {
+        try {
+          const response = await fetch(`/api/websocket?action=create-lobby&playerId=${playerId}&playerAddress=${currentAddress}`)
+          const data = await response.json()
+          
+          if (data.type === 'lobby_created') {
+            setLobbyId(data.lobbyId)
+            setMatchId(data.lobbyId)
+            setStatus('waiting')
+            
+            // Start polling for other players
+            const pollForPlayers = async () => {
+              try {
+                const statusResponse = await fetch(`/api/websocket?action=get-lobby-status&lobbyId=${data.lobbyId}`)
+                const statusData = await statusResponse.json()
+                
+                if (statusData.players.length >= 2) {
+                  setStatus('found')
+                  onMatchFound({
+                    matchId: data.lobbyId,
+                    status: 'ready',
+                    players: statusData.players,
+                    playerAddress: currentAddress
+                  })
+                } else {
+                  // Continue polling
+                  setTimeout(pollForPlayers, 1000)
+                }
+              } catch (error) {
+                console.error('Error polling for players:', error)
+                setStatus('error')
+                setError('Failed to check for players')
+              }
+            }
+            
+            // Start polling after a short delay
+            setTimeout(pollForPlayers, 1000)
+          }
+        } catch (error) {
+          console.error('Error creating lobby:', error)
+          setStatus('error')
+          setError('Failed to create lobby')
+        }
+      }
       
+      createLobby()
       return
     }
     

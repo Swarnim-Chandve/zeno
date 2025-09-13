@@ -8,6 +8,10 @@
   ],
   "routes": [
     {
+      "src": "/api/websocket",
+      "dest": "/api/websocket"
+    },
+    {
       "src": "/(.*)",
       "dest": "frontend/$1"
     }
@@ -19,5 +23,10 @@
     "NEXT_PUBLIC_NETWORK_NAME": "Fuji Testnet",
     "NEXT_PUBLIC_RPC_URL": "https://api.avax-test.network/ext/bc/C/rpc",
     "NEXT_PUBLIC_BACKEND_URL": "https://math-duel-backend.vercel.app"
+  },
+  "functions": {
+    "frontend/app/api/websocket/route.ts": {
+      "maxDuration": 30
+    }
   }
 }
