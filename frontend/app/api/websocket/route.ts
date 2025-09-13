@@ -1,5 +1,11 @@
 import { NextRequest } from 'next/server'
 
+// Extend global type for in-memory storage
+declare global {
+  var lobbies: Map<string, any> | undefined
+  var players: Map<string, any> | undefined
+}
+
 export async function GET(request: NextRequest) {
   // For WebSocket upgrade requests, we'll use a different approach
   // Since Vercel doesn't support WebSocket upgrades in serverless functions,
