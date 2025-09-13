@@ -42,7 +42,9 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
     if (!currentAddress) return
 
     // Connect to WebSocket
-    const websocket = new WebSocket('ws://localhost:3001')
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
+    const wsUrl = backendUrl.replace('http', 'ws').replace('https', 'wss')
+    const websocket = new WebSocket(wsUrl)
     websocket.onopen = () => {
       websocket.send(JSON.stringify({
         type: 'join',

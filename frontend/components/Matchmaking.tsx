@@ -30,7 +30,9 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     if (!currentAddress) return
 
     // Connect to WebSocket for real-time updates
-    const websocket = new WebSocket('ws://localhost:3001')
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
+    const wsUrl = backendUrl.replace('http', 'ws').replace('https', 'wss')
+    const websocket = new WebSocket(wsUrl)
     websocket.onopen = () => {
       websocket.send(JSON.stringify({
         type: 'join_matchmaking',
@@ -62,7 +64,7 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
 
     const findMatch = async () => {
       try {
-        const response = await fetch('http://localhost:3001/match', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/match`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ],
+  "env": {
+    "CONTRACT_ADDRESS": "0x084b724ddF750f05b0d36beD6cc7EB5147a239Cd",
+    "TOKEN_ADDRESS": "0x3C7b30dcbe935233344656c1BA7E53952E5288C9",
+    "CHAIN_ID": "43113",
+    "NETWORK": "fuji",
+    "PORT": "3001"
+  }
+}
