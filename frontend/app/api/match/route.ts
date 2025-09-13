@@ -1,9 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Types
+interface Match {
+  id: string;
+  players: string[];
+  questions: any[];
+  answers: Map<string, any>;
+  status: 'waiting' | 'ready' | 'active' | 'completed';
+  createdAt: number;
+}
+
 // In-memory storage (in production, use a database)
-let matches = new Map();
-let players = new Map();
+let matches = new Map<string, Match>();
+let players = new Map<string, string>();
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -20,7 +30,7 @@ export async function GET(request: NextRequest) {
     // Get all waiting players (global queue status)
     const waitingPlayers = Array.from(matches.values())
       .filter(match => match.status === 'waiting')
-      .flatMap(match => match.players.map(address => ({
+      .flatMap(match => match.players.map((address: string) => ({
         address,
         joinedAt: match.createdAt
       })));
@@ -47,12 +57,11 @@ export async function POST(request: NextRequest) {
     
     // Look for available match or create new one
     let matchId = null;
-    for (const [id, match] of matches) {
+    matches.forEach((match, id) => {
       if (match.players.length === 1 && !match.players.includes(playerAddress)) {
         matchId = id;
-        break;
       }
-    }
+    });
     
     if (!matchId) {
       // Create new match
@@ -68,8 +77,10 @@ export async function POST(request: NextRequest) {
     } else {
       // Join existing match
       const match = matches.get(matchId);
-      match.players.push(playerAddress);
-      match.status = 'ready';
+      if (match) {
+        match.players.push(playerAddress);
+        match.status = 'ready';
+      }
     }
     
     players.set(playerAddress, matchId);
@@ -77,15 +88,16 @@ export async function POST(request: NextRequest) {
     // Get all waiting players (players in matches with status 'waiting')
     const waitingPlayers = Array.from(matches.values())
       .filter(match => match.status === 'waiting')
-      .flatMap(match => match.players.map(address => ({
+      .flatMap(match => match.players.map((address: string) => ({
         address,
         joinedAt: match.createdAt
       })));
 
+    const currentMatch = matches.get(matchId);
     return NextResponse.json({ 
       matchId, 
-      status: matches.get(matchId).status,
-      players: matches.get(matchId).players.length,
+      status: currentMatch?.status || 'unknown',
+      players: currentMatch?.players.length || 0,
       waitingPlayers
     });
   } catch (error) {

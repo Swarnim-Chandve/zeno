@@ -3,8 +3,8 @@
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { useState, useEffect } from 'react'
 import { Wallet, Play, Trophy, Users } from 'lucide-react'
-import { Matchmaking } from '@/components/Matchmaking'
-import { DuelScreen } from '@/components/DuelScreen'
+import { MatchmakingWebSocket } from '@/components/MatchmakingWebSocket'
+import { DuelScreenWebSocket } from '@/components/DuelScreenWebSocket'
 import { Results } from '@/components/Results'
 
 export default function Home() {
@@ -86,11 +86,11 @@ export default function Home() {
   }
 
   if (currentView === 'matchmaking') {
-    return <Matchmaking onMatchFound={handleMatchFound} onBack={resetToHome} isDemoMode={isDemoMode} playerAddress={isDemoMode ? '0xDemoPlayer123...' : address} />
+    return <MatchmakingWebSocket onMatchFound={handleMatchFound} onBack={resetToHome} isDemoMode={isDemoMode} playerAddress={isDemoMode ? '0xDemoPlayer123...' : address} />
   }
 
   if (currentView === 'duel' && matchData) {
-    return <DuelScreen match={matchData} onComplete={handleDuelComplete} onBack={resetToHome} isDemoMode={isDemoMode} />
+    return <DuelScreenWebSocket match={matchData} onBack={resetToHome} isDemoMode={isDemoMode} />
   }
 
   if (currentView === 'results' && duelData) {

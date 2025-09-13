@@ -45,13 +45,12 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
         }
         
         // Look for available match or create new one
-        let foundMatchId = null
-        for (const [id, match] of localMatches) {
+        let foundMatchId: string | null = null
+        localMatches.forEach((match, id) => {
           if (match.players.length === 1 && !match.players.includes(currentAddress)) {
             foundMatchId = id
-            break
           }
-        }
+        })
         
         if (!foundMatchId) {
           // Create new match
@@ -64,13 +63,13 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
             status: 'waiting',
             createdAt: Date.now()
           }
-          setLocalMatches(prev => new Map(prev).set(foundMatchId, newMatch))
+          setLocalMatches(prev => new Map(prev).set(foundMatchId!, newMatch))
           setStatus('waiting')
         } else {
           // Join existing match
           setLocalMatches(prev => {
             const newMap = new Map(prev)
-            const match = newMap.get(foundMatchId)
+            const match = newMap.get(foundMatchId!)
             if (match) {
               match.players.push(currentAddress)
               match.status = 'ready'
@@ -87,7 +86,7 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
         }
         
         setMatchId(foundMatchId)
-        setLocalPlayers(prev => new Map(prev).set(currentAddress, foundMatchId))
+        setLocalPlayers(prev => new Map(prev).set(currentAddress, foundMatchId!))
         
       } catch (err) {
         console.error('Matchmaking error:', err)
@@ -102,7 +101,7 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     const updateOnlineCount = () => {
       const allWaitingPlayers = Array.from(localMatches.values())
         .filter(match => match.status === 'waiting')
-        .flatMap(match => match.players.map(address => ({
+        .flatMap(match => match.players.map((address: string) => ({
           address,
           joinedAt: match.createdAt
         })));
