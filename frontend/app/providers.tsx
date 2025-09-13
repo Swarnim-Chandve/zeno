@@ -10,11 +10,11 @@ import { useState, useEffect } from 'react'
 // Prevent ethereum property redefinition errors
 if (typeof window !== 'undefined') {
   const originalDefineProperty = Object.defineProperty
-  Object.defineProperty = function(obj, prop, descriptor) {
+  Object.defineProperty = function<T>(obj: T, prop: PropertyKey, descriptor: PropertyDescriptor & ThisType<any>): T {
     if (prop === 'ethereum' && obj === window && window.ethereum) {
       return obj
     }
-    return originalDefineProperty.call(this, obj, prop, descriptor)
+    return originalDefineProperty.call(this, obj, prop, descriptor) as T
   }
 }
 
