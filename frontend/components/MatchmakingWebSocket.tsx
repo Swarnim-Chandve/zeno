@@ -31,6 +31,96 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
 
+  // Create lobby function
+  const createLobby = async () => {
+    const currentAddress = isDemoMode ? playerAddress : address
+    if (!currentAddress) return
+
+    const playerId = playerIdRef.current || `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    playerIdRef.current = playerId
+
+    try {
+      const response = await fetch(`/api/websocket?action=create-lobby&playerId=${playerId}&playerAddress=${currentAddress}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const text = await response.text()
+      let data
+      
+      try {
+        data = JSON.parse(text)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError)
+        console.error('Response text:', text)
+        throw new Error('Invalid JSON response from server')
+      }
+      
+      if (data.type === 'lobby_created') {
+        setLobbyId(data.lobbyId)
+        setMatchId(data.lobbyId)
+        setStatus('waiting')
+        
+        // Start polling for other players
+        const pollForPlayers = async () => {
+          try {
+            const statusResponse = await fetch(`/api/websocket?action=get-lobby-status&lobbyId=${data.lobbyId}`)
+            
+            if (!statusResponse.ok) {
+              throw new Error(`HTTP error! status: ${statusResponse.status}`)
+            }
+            
+            const statusText = await statusResponse.text()
+            let statusData
+            
+            try {
+              statusData = JSON.parse(statusText)
+            } catch (parseError) {
+              console.error('JSON parse error in polling:', parseError)
+              console.error('Response text:', statusText)
+              throw new Error('Invalid JSON response from server')
+            }
+            
+            if (statusData.players.length >= 2) {
+              setStatus('found')
+              onMatchFound({
+                matchId: data.lobbyId,
+                status: 'ready',
+                players: statusData.players,
+                playerAddress: currentAddress
+              })
+            } else {
+              // Continue polling
+              setTimeout(pollForPlayers, 1000)
+            }
+          } catch (error) {
+            console.error('Error polling for players:', error)
+            setStatus('error')
+            setError(`Failed to check for players: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          }
+        }
+        
+        // Start polling after a short delay
+        setTimeout(pollForPlayers, 1000)
+      }
+    } catch (error) {
+      console.error('Error creating lobby:', error)
+      setStatus('error')
+      setError(`Failed to create lobby: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      
+      // Retry mechanism
+      if (retryCount < 3) {
+        setRetryCount(prev => prev + 1)
+        setTimeout(() => {
+          setStatus('idle')
+          setError(null)
+          createLobby()
+        }, 2000 * retryCount) // Exponential backoff
+      }
+    }
+  }
+
   // Join lobby function
   const joinLobby = async () => {
     const currentAddress = isDemoMode ? playerAddress : address
@@ -134,98 +224,13 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
     if (isProduction) {
       console.log('Using production API system')
       setIsConnected(true)
-      setStatus('searching')
+      setStatus('idle') // Changed from 'searching' to 'idle'
       
-      // Create lobby using API
-      const createLobby = async () => {
-        try {
-          const response = await fetch(`/api/websocket?action=create-lobby&playerId=${playerId}&playerAddress=${currentAddress}`)
-          
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
-          }
-          
-          const text = await response.text()
-          let data
-          
-          try {
-            data = JSON.parse(text)
-          } catch (parseError) {
-            console.error('JSON parse error:', parseError)
-            console.error('Response text:', text)
-            throw new Error('Invalid JSON response from server')
-          }
-          
-          if (data.type === 'lobby_created') {
-            setLobbyId(data.lobbyId)
-            setMatchId(data.lobbyId)
-            setStatus('waiting')
-            
-            // Start polling for other players
-            const pollForPlayers = async () => {
-              try {
-                const statusResponse = await fetch(`/api/websocket?action=get-lobby-status&lobbyId=${data.lobbyId}`)
-                
-                if (!statusResponse.ok) {
-                  throw new Error(`HTTP error! status: ${statusResponse.status}`)
-                }
-                
-                const statusText = await statusResponse.text()
-                let statusData
-                
-                try {
-                  statusData = JSON.parse(statusText)
-                } catch (parseError) {
-                  console.error('JSON parse error in polling:', parseError)
-                  console.error('Response text:', statusText)
-                  throw new Error('Invalid JSON response from server')
-                }
-                
-                if (statusData.players.length >= 2) {
-                  setStatus('found')
-                  onMatchFound({
-                    matchId: data.lobbyId,
-                    status: 'ready',
-                    players: statusData.players,
-                    playerAddress: currentAddress
-                  })
-                } else {
-                  // Continue polling
-                  setTimeout(pollForPlayers, 1000)
-                }
-              } catch (error) {
-                console.error('Error polling for players:', error)
-                setStatus('error')
-                setError(`Failed to check for players: ${error instanceof Error ? error.message : 'Unknown error'}`)
-              }
-            }
-            
-            // Start polling after a short delay
-            setTimeout(pollForPlayers, 1000)
-          }
-        } catch (error) {
-          console.error('Error creating lobby:', error)
-          setStatus('error')
-          setError(`Failed to create lobby: ${error instanceof Error ? error.message : 'Unknown error'}`)
-          
-          // Retry mechanism
-          if (retryCount < 3) {
-            setRetryCount(prev => prev + 1)
-            setTimeout(() => {
-              setStatus('connecting')
-              setError(null)
-              createLobby()
-            }, 2000 * retryCount) // Exponential backoff
-          }
-        }
-      }
+      // Initialize player ID
+      playerIdRef.current = playerId
 
       
-      if (mode === 'create') {
-        createLobby()
-      } else if (mode === 'join' && joinLobbyId) {
-        joinLobby()
-      }
+      // Don't automatically create lobby - let user choose
       return
     }
     
@@ -352,6 +357,8 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
 
   const getStatusMessage = () => {
     if (!isConnected) return 'Connecting to game server...'
+    if (status === 'idle') return 'Choose an option to start playing'
+    if (status === 'connecting') return 'Connecting...'
     if (status === 'waiting') return 'Waiting for another player...'
     if (status === 'found') return 'Match found! Starting game...'
     if (status === 'error') return error || 'Something went wrong'
@@ -360,6 +367,8 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
 
   const getStatusIcon = () => {
     if (!isConnected) return <Loader2 className="w-5 h-5 animate-spin" />
+    if (status === 'idle') return <Users className="w-5 h-5" />
+    if (status === 'connecting') return <Loader2 className="w-5 h-5 animate-spin" />
     if (status === 'waiting') return <Clock className="w-5 h-5" />
     if (status === 'found') return <Users className="w-5 h-5 text-green-500" />
     if (status === 'error') return <X className="w-5 h-5 text-red-500" />
@@ -438,6 +447,22 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
             </button>
           </div>
           
+          {mode === 'create' && (
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setStatus('connecting')
+                  setError(null)
+                  createLobby()
+                }}
+                disabled={status === 'connecting' || status === 'waiting'}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                {status === 'connecting' ? 'Creating...' : 'Create New Lobby'}
+              </button>
+            </div>
+          )}
+          
           {mode === 'join' && (
             <div className="space-y-3">
               <input
@@ -458,7 +483,7 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
                 disabled={!joinLobbyId.trim() || status === 'connecting'}
                 className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors"
               >
-                Join Lobby
+                {status === 'connecting' ? 'Joining...' : 'Join Lobby'}
               </button>
             </div>
           )}
