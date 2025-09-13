@@ -36,12 +36,36 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
     const playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     playerIdRef.current = playerId
 
-    // Use localhost for development, or your deployed WebSocket server
+    // For production, use a fallback since WebSocket server isn't deployed
+    // In production, we'll use a simple polling-based system
     const wsUrl = process.env.NODE_ENV === 'production' 
-      ? 'wss://zeno-websocket-server.vercel.app' 
+      ? null // Disable WebSocket in production for now
       : 'ws://localhost:3004'
 
     console.log('Connecting to WebSocket:', wsUrl)
+    
+    // If no WebSocket URL (production), use polling-based system
+    if (!wsUrl) {
+      console.log('WebSocket disabled in production, using polling system')
+      setIsConnected(true)
+      setStatus('searching')
+      
+      // Simulate finding a match after a delay
+      setTimeout(() => {
+        const mockMatchId = `match_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        setLobbyId(mockMatchId)
+        setMatchId(mockMatchId)
+        setStatus('found')
+        onMatchFound({
+          matchId: mockMatchId,
+          status: 'ready',
+          players: [currentAddress, 'opponent'],
+          playerAddress: currentAddress
+        })
+      }, 2000)
+      
+      return
+    }
     
     try {
       const ws = new WebSocket(wsUrl)

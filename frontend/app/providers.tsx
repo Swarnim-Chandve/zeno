@@ -7,16 +7,25 @@ import { injected, metaMask } from 'wagmi/connectors'
 import { createClient } from 'viem'
 import { useState, useEffect } from 'react'
 
-// Prevent ethereum property redefinition errors
-if (typeof window !== 'undefined') {
-  const originalDefineProperty = Object.defineProperty
-  Object.defineProperty = function<T>(obj: T, prop: PropertyKey, descriptor: PropertyDescriptor & ThisType<any>): T {
-    if (prop === 'ethereum' && obj === window && window.ethereum) {
-      return obj
+  // Prevent ethereum property redefinition errors
+  if (typeof window !== 'undefined') {
+    const originalDefineProperty = Object.defineProperty
+    Object.defineProperty = function<T>(obj: T, prop: PropertyKey, descriptor: PropertyDescriptor & ThisType<any>): T {
+      if (prop === 'ethereum' && obj === window) {
+        // If ethereum already exists, don't redefine it
+        if (window.ethereum) {
+          return obj
+        }
+      }
+      try {
+        return originalDefineProperty.call(this, obj, prop, descriptor) as T
+      } catch (error) {
+        // If redefinition fails, just return the object
+        console.warn('Property redefinition failed:', prop, error)
+        return obj
+      }
     }
-    return originalDefineProperty.call(this, obj, prop, descriptor) as T
   }
-}
 
 const config = createConfig({
   chains: [avalancheFuji],

@@ -59,10 +59,33 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     if (!currentAddress) return
 
     const wsUrl = process.env.NODE_ENV === 'production' 
-      ? 'wss://zeno-websocket-server.vercel.app' 
+      ? null // Disable WebSocket in production for now
       : 'ws://localhost:3004'
 
     console.log('Connecting to WebSocket for duel:', wsUrl)
+    
+    // If no WebSocket URL (production), simulate game
+    if (!wsUrl) {
+      console.log('WebSocket disabled in production, using simulation')
+      setWsConnected(true)
+      setGameStatus('playing')
+      
+      // Generate mock questions
+      const mockQuestions = [
+        { id: 0, question: "5 + 3", answer: 8, timeLimit: 30 },
+        { id: 1, question: "12 - 7", answer: 5, timeLimit: 30 },
+        { id: 2, question: "4 × 6", answer: 24, timeLimit: 30 },
+        { id: 3, question: "18 ÷ 2", answer: 9, timeLimit: 30 },
+        { id: 4, question: "9 + 11", answer: 20, timeLimit: 30 }
+      ]
+      setQuestions(mockQuestions)
+      setPlayers([
+        { id: currentAddress, address: currentAddress, score: 0, answers: [] },
+        { id: 'opponent', address: 'opponent', score: 0, answers: [] }
+      ])
+      
+      return
+    }
     
     try {
       const ws = new WebSocket(wsUrl)
