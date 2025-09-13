@@ -1,5 +1,853 @@
 ---
-description:
+description:# ChainRow
+URL: /docs/builderkit/components/chains/chain-row
+
+A component for displaying chain information in a row layout with icon and name.
+
+# ChainRow
+
+The ChainRow component displays chain information in a horizontal layout, combining a chain icon with its name.
+
+## Usage
+
+```tsx
+import { ChainRow } from '@avalabs/builderkit';
+
+// Basic usage
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+/>
+
+// With custom styling
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+  className="bg-gray-100 p-2 rounded-lg"
+/>
+```
+
+## Props
+
+| Prop        | Type     | Default | Description            |
+| ----------- | -------- | ------- | ---------------------- |
+| `chain_id`  | `number` | -       | Chain ID               |
+| `name`      | `string` | -       | Chain name             |
+| `className` | `string` | -       | Additional CSS classes |
+
+## Features
+
+* Combines ChainIcon with chain name
+* Horizontal layout with proper spacing
+* Flexible styling through className
+* Simple and lightweight implementation
+* Consistent alignment and spacing
+
+## Examples
+
+### Basic Chain Display
+
+```tsx
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+/>
+```
+
+### In a List
+
+```tsx
+<div className="flex flex-col gap-2">
+  <ChainRow 
+    chain_id={43114}
+    name="Avalanche C-Chain"
+  />
+  <ChainRow 
+    chain_id={43113}
+    name="Fuji Testnet"
+  />
+</div>
+```
+
+### Interactive Row
+
+```tsx
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+  className="hover:bg-gray-100 cursor-pointer"
+/>
+```
+
+### With Custom Styling
+
+```tsx
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+  className="border border-gray-200 rounded-lg p-3 shadow-xs"
+/>
+```
+
+## Layout Structure
+
+The component uses a flex layout with:
+
+* ChainIcon on the left
+* Chain name on the right
+* Gap between icon and name
+* Center alignment of items
+
+
+# Chain Hooks
+URL: /docs/builderkit/hooks/chains
+
+Hooks for interacting with blockchain networks and chain data.
+
+# Chain Hooks
+
+BuilderKit provides hooks for interacting with blockchain networks and managing chain-related data.
+
+## useChains
+
+The `useChains` hook provides functions for accessing and managing chain information.
+
+```tsx
+import { useChains } from '@avalabs/builderkit';
+
+const { 
+  getChains,
+  getChain,
+  getProvider,
+  getBlock
+} = useChains();
+
+// Get all configured chains
+const chains = getChains();
+
+// Get specific chain info
+const chain = getChain(43114); // Avalanche C-Chain
+
+// Get provider for a chain
+const provider = getProvider(43114);
+
+// Get block information
+const block = await getBlock(43114, 12345);
+```
+
+### Available Functions
+
+* `getChains()`: Get list of all configured chains
+* `getChain(chain_id: number)`: Get chain information by ID
+* `getProvider(chain_id: number)`: Get ethers provider for a chain
+* `getBlock(chain_id: number, block_number: number)`: Get block information
+
+### Integration Example
+
+```tsx
+function ChainSelector() {
+  const { getChains, getChain } = useChains();
+  const [selectedChainId, setSelectedChainId] = useState<number>();
+  
+  const chains = getChains();
+  const selectedChain = selectedChainId ? getChain(selectedChainId) : undefined;
+  
+  return (
+    <div>
+      <h2>Current Chain: {selectedChain?.name}</h2>
+      <select 
+        value={selectedChainId} 
+        onChange={(e) => setSelectedChainId(Number(e.target.value))}
+      >
+        {chains.map(chain => (
+          <option key={chain.id} value={chain.id}>
+            {chain.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+```
+# Glacier Hooks
+URL: /docs/builderkit/hooks/glacier
+
+Hooks for interacting with Glacier API and blockchain data.
+
+# Glacier Hooks
+
+BuilderKit provides hooks for interacting with the Glacier API, which provides blockchain data and token information.
+
+## useGlacier
+
+The `useGlacier` hook provides functions for accessing chain information and token balances through Glacier.
+
+```tsx
+import { useGlacier } from '@avalabs/builderkit';
+
+const { 
+  getChainInformation,
+  listErc20Balances
+} = useGlacier();
+
+// Get chain information
+const chainInfo = await getChainInformation(43114);
+
+// Get ERC20 token balances
+const balances = await listErc20Balances(
+  43114,                 // Chain ID
+  "0x1234..."           // Wallet address
+);
+```
+
+### Available Functions
+
+* `getChainInformation(chain_id: number)`: Get detailed information about a chain
+* `listErc20Balances(chain_id: number, address: string)`: Get all ERC20 token balances for an address
+
+### Integration Example
+
+```tsx
+function TokenBalances({ address }: { address: string }) {
+  const { listErc20Balances } = useGlacier();
+  const [balances, setBalances] = useState([]);
+  
+  useEffect(() => {
+    const fetchBalances = async () => {
+      const tokenBalances = await listErc20Balances(43114, address);
+      setBalances(tokenBalances);
+    };
+    
+    fetchBalances();
+  }, [address]);
+  
+  return (
+    <div className="space-y-2">
+      {balances.map(balance => (
+        <div key={balance.token_address} className="flex justify-between">
+          <span>{balance.symbol}</span>
+          <span>{balance.formatted_amount}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+# Token Hooks
+URL: /docs/builderkit/hooks/tokens
+
+Hooks for interacting with ERC20 tokens.
+
+# Token Hooks
+
+BuilderKit provides hooks for interacting with ERC20 tokens, including balance checking, approvals, and token information.
+
+## useTokens
+
+The `useTokens` hook provides functions for accessing token information and performing token-related operations.
+
+```tsx
+import { useTokens } from '@avalabs/builderkit';
+
+const { 
+  getCustomToken,
+  getBalance,
+  getAllowance,
+  approve
+} = useTokens();
+
+// Get token information
+const [name, symbol, decimals] = await getCustomToken(
+  43114,                 // Chain ID
+  "0x1234..."           // Token address
+);
+
+// Get token balance
+const balance = await getBalance(
+  43114,                 // Chain ID
+  "0x1234...",          // Token address
+  "0x5678..."           // Wallet address
+);
+
+// Check allowance
+const allowance = await getAllowance(
+  43114,                 // Chain ID
+  "0x1234...",          // Token address
+  "0x5678...",          // Owner address
+  "0x9012..."           // Spender address
+);
+
+// Generate approve transaction
+const approveData = approve(
+  "0x1234...",          // Token address
+  "0x5678...",          // Spender address
+  new BigNumber("1.0"),  // Amount
+  18                     // Decimals
+);
+```
+
+### Available Functions
+
+* `getCustomToken(chain_id: number, address: string)`: Get token name, symbol, and decimals
+* `getBalance(chain_id: number, address: string, wallet: string)`: Get token balance for an address
+* `getAllowance(chain_id: number, address: string, owner: string, spender: string)`: Get token allowance
+* `approve(address: string, spender: string, amount: BigNumber, decimals: number)`: Generate approve transaction data
+
+### Integration Example
+
+```tsx
+function TokenApproval({ token, spender }: { token: string, spender: string }) {
+  const { getAllowance, approve } = useTokens();
+  const [allowance, setAllowance] = useState("0");
+  
+  useEffect(() => {
+    const checkAllowance = async () => {
+      const amount = await getAllowance(43114, token, account, spender);
+      setAllowance(amount.toString());
+    };
+    
+    checkAllowance();
+  }, [token, spender]);
+  
+  const handleApprove = () => {
+    const data = approve(token, spender, new BigNumber("1000"), 18);
+    
+    return (
+      <TransactionButton
+        chain_id={43114}
+        title="Approve Token"
+        description="Approving token for spending"
+        data={data}
+      />
+    );
+  };
+  
+  return (
+    <div>
+      <div>Current Allowance: {allowance}</div>
+      {handleApprove()}
+    </div>
+  );
+}
+```
+# Uniswap Hooks
+URL: /docs/builderkit/hooks/uniswap
+
+Hooks for interacting with Uniswap V2 protocol on Avalanche.
+
+# Uniswap Hooks
+
+BuilderKit provides hooks for interacting with Uniswap V2-compatible DEXs on Avalanche, such as Trader Joe.
+
+## useUniswapV2
+
+The `useUniswapV2` hook provides functions for swapping tokens and managing liquidity using Uniswap V2 protocol.
+
+```tsx
+import { useUniswapV2 } from '@avalabs/builderkit';
+
+const { 
+  getPair,
+  getReserves,
+  getAmountOut,
+  getQuote,
+  getMinAmountOut,
+  getSwapTransaction
+} = useUniswapV2();
+
+// Get pair address
+const pairAddress = await getPair(
+  43114,                 // Chain ID
+  tokenA,               // Token A info
+  tokenB                // Token B info
+);
+
+// Get pair reserves
+const reserves = await getReserves(
+  43114,                // Chain ID
+  pairAddress           // Pair address
+);
+
+// Calculate output amount
+const amountOut = getAmountOut(
+  reserves,             // [reserve0, reserve1]
+  new BigNumber("1.0"), // Amount in
+  tokenA,              // Token in info
+  tokenB               // Token out info
+);
+
+// Get swap transaction data
+const swapData = await getSwapTransaction(
+  43114,               // Chain ID
+  tokenA,             // Token in info
+  tokenB,             // Token out info
+  new BigNumber("1.0"), // Amount in
+  amountOut,          // Minimum amount out
+  "0x1234..."         // Recipient
+);
+```
+
+### Available Functions
+
+* `getPair(chain_id: number, token_in: any, token_out: any)`: Get pair contract address
+* `getReserves(chain_id: number, pair: string)`: Get pair reserves
+* `getAmountOut(reserves: [BigNumber, BigNumber], amount_in: BigNumber, token_in: any, token_out: any, fee?: number)`: Calculate output amount
+* `getQuote(chain_id: number, token_in: any, token_out: any, amount_in: BigNumber)`: Get quote for swap
+* `getMinAmountOut(amount: BigNumber, slippage?: number)`: Calculate minimum output with slippage
+* `getSwapTransaction(chain_id: number, token_in: any, token_out: any, amount_in: BigNumber, amount_out: BigNumber, receiver: string)`: Generate swap transaction
+
+### Integration Example
+
+```tsx
+function SwapInterface() {
+  const { getQuote, getMinAmountOut, getSwapTransaction } = useUniswapV2();
+  const [amountIn, setAmountIn] = useState("");
+  const [amountOut, setAmountOut] = useState("");
+  
+  // Calculate output amount when input changes
+  useEffect(() => {
+    const calculateOutput = async () => {
+      if (!amountIn) return;
+      
+      const output = await getQuote(
+        43114,
+        tokenA,
+        tokenB,
+        new BigNumber(amountIn)
+      );
+      setAmountOut(output.toString());
+    };
+    
+    calculateOutput();
+  }, [amountIn]);
+  
+  // Execute swap
+  const handleSwap = async () => {
+    const minOut = getMinAmountOut(new BigNumber(amountOut), 0.5); // 0.5% slippage
+    
+    const data = await getSwapTransaction(
+      43114,
+      tokenA,
+      tokenB,
+      new BigNumber(amountIn),
+      minOut,
+      account
+    );
+    
+    return (
+      <TransactionButton
+        chain_id={43114}
+        title="Swap Tokens"
+        description="Swapping tokens on Trader Joe"
+        data={data}
+      />
+    );
+  };
+  
+  return (
+    <div>
+      <input
+        type="text"
+        value={amountIn}
+        onChange={(e) => setAmountIn(e.target.value)}
+        placeholder="Amount in"
+      />
+      <div>Output: {amountOut}</div>
+      {handleSwap()}
+    </div>
+  );
+}
+```
+# ICTT Hooks
+URL: /docs/builderkit/hooks/ictt
+
+Hooks for Inter-Chain Token Transfer functionality.
+
+# ICTT Hooks
+
+BuilderKit provides hooks for handling Inter-Chain Token Transfer (ICTT) operations between Avalanche chains.
+
+## useICTT
+
+The `useICTT` hook provides functions for transferring tokens between different Avalanche chains.
+
+```tsx
+import { useICTT } from '@avalabs/builderkit';
+
+const { 
+  getInterchainMessenger,
+  send,
+  sendNative,
+  getMessageId,
+  getReceiveTransaction,
+  getHomeHopMessageId
+} = useICTT();
+
+// Get messenger contract
+const messenger = await getInterchainMessenger(43114);
+
+// Send ERC20 tokens
+const sendData = send(
+  transferer,           // Transferer contract
+  destinationChainHex,  // Destination chain ID in hex
+  destTransferer,       // Destination transferer
+  receiver,            // Recipient address
+  feeTokenAddr,        // Fee token address
+  amount,              // Amount to send
+  decimals,            // Token decimals
+  isMultiHop           // Whether this is a multi-hop transfer
+);
+
+// Send native token
+const sendNativeData = sendNative(
+  transferer,           // Transferer contract
+  destinationChainHex,  // Destination chain ID in hex
+  destTransferer,       // Destination transferer
+  receiver,            // Recipient address
+  feeTokenAddr,        // Fee token address
+  amount,              // Amount to send
+  decimals,            // Token decimals
+  isMultiHop           // Whether this is a multi-hop transfer
+);
+
+// Get message ID from log
+const messageId = getMessageId(txLog);
+
+// Get receive transaction
+const receiveData = await getReceiveTransaction(
+  43114,              // Chain ID
+  messageId           // Message ID
+);
+
+// Get home hop message ID
+const hopMessageId = await getHomeHopMessageId(
+  43114,              // Chain ID
+  txHash              // Transaction hash
+);
+```
+
+### Available Functions
+
+* `getInterchainMessenger(chain_id: number)`: Get messenger contract address
+* `send(transferer: string, destination_L1_hex: string, destination_transferer: string, receiver: string, fee_token_addr: string, amount: BigNumber, decimals: number, is_multi_hop: boolean)`: Generate ERC20 transfer transaction
+* `sendNative(transferer: string, destination_L1_hex: string, destination_transferer: string, receiver: string, fee_token_addr: string, amount: BigNumber, decimals: number, is_multi_hop: boolean)`: Generate native token transfer transaction
+* `getMessageId(log: any)`: Extract message ID from transaction log
+* `getReceiveTransaction(chain_id: number, message_id: string)`: Generate receive transaction
+* `getHomeHopMessageId(chain_id: number, hash: string)`: Get message ID for home hop
+
+### Integration Example
+
+```tsx
+function ICTTTransfer() {
+  const { getInterchainMessenger, send, getMessageId } = useICTT();
+  
+  const handleTransfer = async () => {
+    // Get messenger contract
+    const messenger = await getInterchainMessenger(43114);
+    
+    // Generate transfer transaction
+    const data = send(
+      transfererContract,
+      "0x0000000000000000000000000000000000000000000000000000000000002aef", // 43114 in hex
+      destinationTransferer,
+      receiverAddress,
+      "0x0000000000000000000000000000000000000000", // Zero address for native fee
+      new BigNumber("1.0"),
+      18,
+      false
+    );
+    
+    return (
+      <TransactionButton
+        chain_id={43114}
+        title="Transfer Tokens"
+        description="Sending tokens cross-chain"
+        data={data}
+        onTransactionConfirmed={(receipt) => {
+          const messageId = getMessageId(receipt.logs[0]);
+          console.log('Transfer message ID:', messageId);
+        }}
+      />
+    );
+  };
+  
+  return (
+    <div>
+      {handleTransfer()}
+    </div>
+  );
+}
+```
+# ICTT Flow
+URL: /docs/builderkit/flows/ictt
+
+Pre-built and customizable flow for transferring tokens between Avalanche chains.
+
+# Inter-Chain Token Transfer (ICTT)
+
+The ICTT (Inter-Chain Token Transfer) flow provides a complete and customizable interface for transferring tokens between different Avalanche chains.
+
+## Basic Usage
+
+```tsx
+import { ICTT } from '@avalabs/builderkit';
+
+function App() {
+  const tokens = [
+    // Array of tokens following the ICTTToken interface
+    // See /docs/builderkit/tokens for configuration details
+    [...]
+  ];
+
+  return (
+    <ICTT 
+      tokens={tokens}
+      token_in="0x1234..."  // Address of the input token
+      source_chain_id={43113}
+      destination_chain_id={173750}
+    />
+  );
+}
+```
+
+## Configuration
+
+### Required Props
+
+| Prop                   | Type          | Description                                               |
+| ---------------------- | ------------- | --------------------------------------------------------- |
+| `tokens`               | `ICTTToken[]` | List of supported tokens with their mirror configurations |
+| `source_chain_id`      | `number`      | ID of the source chain                                    |
+| `destination_chain_id` | `number`      | ID of the destination chain                               |
+| `token_in`             | `string`      | Address of the input token                                |
+
+### Token Configuration
+
+Each token in the `tokens` array should have the following structure:
+
+```typescript
+interface ICTTToken {
+  // Basic token information
+  address: string;          // Token contract address
+  name: string;            // Token name
+  symbol: string;          // Token symbol
+  decimals: number;        // Token decimals
+  chain_id: number;        // Chain ID where token exists
+  
+  // ICTT specific fields
+  supports_ictt: boolean;  // Whether token supports ICTT
+  transferer?: string;     // Transferer contract address
+  is_transferer?: boolean; // Whether token is a transferer
+  
+  // Mirror tokens on other chains
+  mirrors: {
+    address: string;       // Mirror token address
+    transferer: string;    // Mirror token transferer
+    chain_id: number;      // Mirror token chain ID
+    decimals: number;      // Mirror token decimals
+    home?: boolean;        // Whether this is the home chain
+  }[];
+}
+```
+
+### Optional Props
+
+| Prop        | Type     | Default | Description            |
+| ----------- | -------- | ------- | ---------------------- |
+| `className` | `string` | -       | Additional CSS classes |
+
+## Features
+
+The ICTT flow includes:
+
+* Chain selection for source and destination
+* Token selection with balance display
+* Amount input with validation
+* Gas fee estimation
+* Transaction status tracking
+* Bridge transaction confirmation
+
+## Advanced Usage
+
+### Building Custom Flows
+
+The ICTT flow exposes individual components that you can use to build your own custom transfer interface:
+
+```tsx
+import { 
+  ICTTProvider,
+  ChainSelector, 
+  TokenSelector,
+  AmountInput,
+  TransferButton,
+  TransferStatus 
+} from '@avalabs/builderkit/ictt/components';
+
+function CustomICTT() {
+  const tokens = [
+    // Array of tokens following the ICTTToken interface
+    // See /docs/builderkit/tokens for configuration details
+    [...]
+  ];
+
+  return (
+    <ICTTProvider
+      tokens={tokens}
+      token_in="0x1234..."
+      source_chain_id={43113}
+      destination_chain_id={173750}
+    >
+      <div className="space-y-4">
+        <ChainSelector label="From Chain" onSelect={handleSourceChainSelect} />
+        <TokenSelector chainId={sourceChainId} onSelect={handleTokenSelect} />
+        <AmountInput value={amount} onChange={setAmount} token={selectedToken} />
+        <ChainSelector label="To Chain" onSelect={handleDestChainSelect} />
+        <TransferButton />
+        <TransferStatus />
+      </div>
+    </ICTTProvider>
+  );
+}
+```
+
+
+# Faucet Flow
+URL: /docs/builderkit/flows/faucet
+
+Pre-built and customizable flow for interacting with token faucets on test networks.
+
+# Faucet Flow
+
+The Faucet flow provides a complete interface for requesting test tokens from faucets on Avalanche test networks.
+
+## Backend Requirements
+
+The Faucet flow requires a backend API to handle token distribution and rate limiting. You'll need to implement the following endpoints:
+
+```typescript
+// Required API Endpoints
+POST /api/faucet/request
+  body: {
+    address: string;    // Recipient address
+    token: string;      // Token symbol
+    chainId: number;    // Network ID
+  }
+  response: {
+    requestId: string;  // Unique request identifier
+  }
+
+GET /api/faucet/status/:requestId
+  response: {
+    status: 'pending' | 'completed' | 'failed';
+    txHash?: string;    // Transaction hash if completed
+    error?: string;     // Error message if failed
+  }
+```
+
+We provide an example implementation using Next.js API routes, but you can use any backend technology. Note that the example implementation uses in-memory storage and is for demonstration purposes only. For production use, you should:
+
+* Implement persistent storage for request tracking
+* Add proper rate limiting per address/IP
+* Include security measures (API keys, CORS, etc.)
+* Handle concurrent requests appropriately
+* Manage token distribution limits
+
+## Basic Usage
+
+```tsx
+import { Faucet } from '@avalabs/builderkit';
+
+function App() {
+  const tokens = [
+    // Array of tokens following the BaseToken interface
+    // See /docs/builderkit/tokens for configuration details
+    ...
+  ];
+
+  return (
+    <Faucet 
+      chainId={43113}  // Fuji Testnet
+      tokens={tokens}
+    />
+  );
+}
+```
+
+## Configuration
+
+### Required Props
+
+| Prop      | Type      | Description              |
+| --------- | --------- | ------------------------ |
+| `chainId` | `number`  | ID of the test network   |
+| `tokens`  | `Token[]` | List of supported tokens |
+
+### Token Configuration
+
+Each token in the `tokens` array should have the following structure:
+
+```typescript
+interface Token {
+  address: string;      // Contract address or "native" for native token
+  name: string;         // Token name
+  symbol: string;       // Token symbol
+  decimals: number;     // Token decimals
+  chain_id: number;     // Chain ID where token exists
+}
+```
+
+### Optional Props
+
+| Prop        | Type     | Default | Description            |
+| ----------- | -------- | ------- | ---------------------- |
+| `className` | `string` | -       | Additional CSS classes |
+
+## Features
+
+The Faucet flow includes:
+
+* Token selection interface
+* Balance display
+* Request handling
+* Status tracking
+* Timeout management
+
+### Building Custom Flows
+
+The Faucet flow exposes individual components that you can use to build your own custom faucet interface:
+
+```tsx
+import { 
+  FaucetProvider,
+  TokenSelector,
+  FaucetButton,
+  RequestStatus,
+  BalanceDisplay
+} from '@avalabs/builderkit/faucet/components';
+
+function CustomFaucet() {
+  const tokens = [
+    // Array of tokens following the BaseToken interface
+    // See /docs/builderkit/tokens for configuration details
+    ...
+  ];
+
+  return (
+    <FaucetProvider
+      chainId={43113}
+      tokens={tokens}
+    >
+      <div className="space-y-4">
+        <TokenSelector onSelect={handleTokenSelect} />
+        <BalanceDisplay token={selectedToken} address={userAddress} />
+        <FaucetButton token={selectedToken} />
+        <RequestStatus requestId={currentRequestId} />
+      </div>
+    </FaucetProvider>
+  );
+}
+```
+
 globs:
-alwaysApply: false
+alwaysApply: true
 ---

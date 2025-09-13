@@ -1,5 +1,2828 @@
 ---
-description:
+description:dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Toolchains
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Deploy with Remix IDE
+Learn how to deploy smart contracts on Avalanche using Remix and Core Wallet.
+
+Avalanche's Primary Network is an Avalanche L1 that has three chains: P-Chain, X-Chain, and C-Chain. The C-Chain is an instance of the Ethereum Virtual Machine powered by Avalanche's Snowman consensus protocol. The C-Chain RPC can do anything a typical Ethereum client can by using the Ethereum-standard RPC calls.
+
+The immediate benefits of using the C-Chain rather than Ethereum are all of the benefits of using Avalanche. These properties that could considerably improve the performance of Dapps and the user experience.
+
+Today, we will deploy and test a smart contract on Avalanche using Remix and Core Wallet.
+
+Setting up Core
+If you don't already have a Core wallet, follow this guide to create a new wallet.
+
+If you want to use the Avalanche C-Chain, it can be selected from the networks list.
+
+To switch to the Fuji test network, go to Settings, select Advanced, and then toggle Testnet Mode to ON.
+
+
+
+Local Testnet Settings
+Network Name: Avalanche Local C-Chain
+New RPC URL: http://127.0.0.1:34890/ext/bc/C/rpc (Note: the port number should match your local setting which can be different from 34890.)
+ChainID: 43112
+Symbol: AVAX
+Explorer: N/A
+Funding Your C-Chain Address
+Using Core Web
+On the Mainnet, you can use Core web to transfer funds from the X-Chain to your C-Chain address. The process is simple, as explained in this tutorial. Please note that you will need Core wallet connected to Core web for making cross-chain transfers. Core wallet can be used on test and local networks, too. This wallet is available for mobile too.
+
+Using Testnet Faucet
+For funding on the test network, Avalanche has a Faucet that drips test tokens to the address of your choice. If you already have an AVAX balance greater than zero on Mainnet, paste your C-Chain address there, and request test tokens. Otherwise, please request a faucet coupon on Guild. Admins and mods on the official Discord can provide testnet AVAX if developers are unable to obtain it from the other two options.
+
+Funding on Local Testnet
+On a local network, you can easily fund your addresses by following this guide.
+
+Connect Core & Deploy Smart Contract Using Remix
+Open Remix → Select Solidity
+
+
+
+Load or create the smart contracts that we want to compile and deploy using Remix file explorer.
+
+For this example, we will deploy a simple Hello World contract from here.
+
+
+
+Select the Solidity compiler tab and compile the contract.
+
+
+
+Navigate to Deploy & Run transactions Tab -> Open the "ENVIRONMENT" drop-down and select Injected Provider (make sure Core is loaded).
+
+
+
+A pop up will ask which wallet to use. Select Core.
+
+
+
+Now, the smart contract is compiled, Core is injected, and we are ready to deploy our Hello world contract. Click "Deploy."
+
+
+
+Confirm the transaction on the Core pop up.
+
+
+
+Our contract is successfully deployed!
+
+
+
+Now, we can expand it by selecting it from the "Deployed Contracts" tab and test it out.
+
+
+
+The contract ABI and Bytecode are available on the Solidity compiler tab.
+
+
+
+If you had any difficulties following this tutorial or simply want to discuss Avalanche with us, you can join our community at Discord!
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Get Test Funds
+
+Next
+
+Create an ERC-20 Token
+
+On this page
+Setting up Core
+Local Testnet Settings
+Funding Your C-Chain Address
+Using Core Web
+Using Testnet Faucet
+Funding on Local Testnet
+Connect Core & Deploy Smart Contract Using Remix
+
+Deploy with Remix IDE | Avalanche Builder Hub
+
+
+
+
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Toolchains
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Create an ERC-20 Token
+Create an ERC-20 Token
+
+ERC-20 tokens are the most fundamental and essential concept in Ethereum. As the Avalanche community and the ecosystem are growing, new use cases and projects that are running on Ethereum or different chains would be implemented to Avalanche.
+
+Therefore, we will be creating our own mintable ERC-20 token and will mint it to any address we want. The token will be generated on Avalanche C-Chain and will be accessible on that chain. We are using Fuji Testnet in this tutorial.
+
+The article focuses on deploying a smart contract written with Solidity to Avalanche. This is the feature that Avalanche provides us - to be able to deploy any smart contract to the chain and no requirement for a new language specific contract concept to interact. Let's look at how to create an ERC-20 contract and deploy it to avalanche C-Chain.
+
+Setup Core Wallet
+The first thing we should do is to enable Testnet mode on Core. To do that, go to Settings and click on Advanced.
+
+Settings image 1
+
+Here, turn on the Testnet Mode feature. This will automatically make Core switch to Fuji Testnet.
+
+Settings image 2
+
+Note
+
+If you are using other wallets, like MetaMask, you can add the Fuji Testnet using the following specs:
+
+Network Name: Avalanche C-Chain
+New RPC URL: https://api.avax-test.network/ext/bc/C/rpc
+ChainID: 43113
+Symbol: AVAX
+Explorer: https://testnet.snowtrace.io
+The setup is done. For now, we have 0 AVAX.
+
+Fund Your C-Chain Address
+Avalanche has a Faucet that drips test tokens to the address of your choice. If you already have an AVAX balance greater than zero on Mainnet, paste your C-Chain address there, and request test tokens. Otherwise, please request a faucet coupon on Guild. Admins and mods on the official Discord can provide testnet AVAX if developers are unable to obtain it from the other two options.
+
+Create Mintable Token
+Now, we can create our mintable token on Remix. Open Remix on your browser or go to this link.
+
+Image for post
+
+You should view this page. On this page, first, click the "Create new file" button. When you click the New File button, you have to choose a name.
+
+Since we will use an ERC-20 contract from OpenZeppelin, just paste this line to the file and save.
+
+
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.9/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+Image for post
+
+After saving the file, we will see a bunch of files that are imported to remix. This is a remix feature that allows us to import a GitHub contract repository to remix by just giving the URL-link with an import statement.
+
+Image for post
+
+We have ERC20PresetMinterPauser.sol file in the presets. This file is written by OpenZeppelin according to ERC20 standards with minter functionality. After deploying this file, we will be the owner of the contract and thus have the authority and ability to mint the tokens.
+
+Image for post
+
+Deploy the Contract
+Open the tab with label Solidity compiler and select the solidity version that matches with the solidity version written in file as pragma solidity …... The version should be equal to or higher than the file's version. For example, in my file, pragma solidity ^0.8.0 is written so the required version is 0.8.0 or higher. As shown, in the compiler the solidity version is 0.8.29, which is OK. After checking the solidity version click the compile button. If you did not change anything in the file, or the solidity version is not wrong, the contract should compile without any errors.
+
+Image for post
+
+Then, let's jump to the tab with label Deploy & run transactions. Here before deploying our contract, we should change the environment. Click to the environment and select "Injected Web3." If a pop-up shows up and asks you to connect the account, click to connect. After, you should see the account address in the "ACCOUNT" text box.
+
+The last thing before the deployment process is to set the contract that will be deployed as a token. Above the Deploy Button, there is a drop-down menu to select a contract. Select the contract named ERC20PresetMinterPauser.sol.
+
+Image for post
+
+Now, here enter the name and symbol of your token. I will name it "test" and the symbol will be tst. You can give it a and click to transact button.
+
+Image for post
+
+After clicking the button, a pop-up will show up and just confirm it.
+
+Core confirmation
+
+And then another pop-up, a Core confirmation, appears. Confirm it.
+
+After confirming all these pop-ups we have deployed our token to avalanche C-Chain. So we can start to interact with it.
+
+Interact with Token
+We can see our transaction that deployed on avalanche C-Chain via this c-chain explorer.
+
+But firstly, let's see our transaction hash from the remix console.
+
+Image for post
+
+After deploying the contract, we should see a log in remix console. When you click to arrow and expand it, a transaction hash will come up. Copy it.
+
+Image for post
+
+Just paste the transaction hash to the explorer I shared above and press enter.
+
+Image for post
+
+Here we can see all details about the transaction and token contract.
+
+Image for post
+
+The first one is my wallet address that creates token and the second address is my token contract address which is named test. Now, let's mint some token to our own address.
+
+Image for post
+
+Come back to the remix and after deploying, you should be able to see the contract in "Deployed Contracts" section.
+
+Here, we have a bunch of functions that we can use to interact with our token contract. You can check all these methods from OpenZeppelin documentation to learn how to use them. But we will only use the mint method.
+
+Click to arrow beside the mint method to read it.
+
+Image for post
+
+Enter your address and an amount in wei. For example, I will mint 1000 tst token so, I entered "1000000000000000000000"
+
+Add Token to Core Wallet
+Now we minted 1000 token to our contract, but you should not be able to see the tokens in your Core wallet. In order to see our own token, we have to add it. On Core, click on the Avalanche C-Chain, and then select Manage:
+
+Add token 1
+
+Add token 2
+
+Click on Add custom token. Here,enter the token address that you can see from the explorer, as showed above. Copy and paste it here. Then click on the Add token button, you should see 1000 token that you named in your Core wallet. Also, you can send it to another account via either remix or Core.
+
+Add token 3
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Deploy with Remix IDE
+
+Next
+
+Deploy NFT Collection
+
+On this page
+Setup Core Wallet
+Fund Your C-Chain Address
+Create Mintable Token
+Deploy the Contract
+Interact with Token
+Add Token to Core Wallet
+
+Create an ERC-20 Token | Avalanche Builder Hub
+
+
+
+
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Learn how to deploy an ERC-721 contract on the Avalanche C-chain.
+
+This tutorial will start you with a basic ERC-721 (NFT) smart contract on the Avalanche Network, regardless of your previous development experience. We'll deploy our NFT on the Avalanche Fuji Testnet and view it on the Snowtrace Testnet Explorer.
+
+Note that these aren't transferable to the Mainnet. However, once you feel comfortable launching your project, you can do so on the Avalanche Mainnet and list it on an NFT marketplace.
+
+The following tools will be used during this tutorial:
+
+Pinata: To store your NFT images and metadata.
+OpenZeppelin's Wizard: to create the ERC-721 smart contract.
+Remix IDE: To edit the code and deploy it to Fuji.
+Avalanche Testnet Faucet: To fund the deployment.
+Core browser Extension: To process transactions related to funding and deploying the smart contract.
+Snowtrace Testnet Explorer: To view the deployed smart contract.
+This Solidity smart contract tutorial is for demonstration purposes only. Users should consider proper precautions, error handling, and safeguards for production use. No one at Ava Labs is responsible for your development, and you must take full responsibility for ensuring your code is secure.
+
+Preparing Your NFT Files
+The first step of setting up an NFT smart contract is having your NFT files ready to use. In this example, the files will get uploaded to Pinata, a pinning service that prevents files from being garbage collected on IPFS.
+
+If you're unfamiliar with the process of uploading image and metadata files to an IPFS provider for NFT collection usage, please check out this article on preparing NFT files. Ensure that your files are uploaded and your base URI is ready to plug into your smart contract.
+
+Once the image and metadata files are ready, we can prepare to deploy a smart contract.
+
+Preparing Your Environment
+Core Extension
+You'll need the Core Extension installed on whatever browser you're using to be able to fund the deployment of the smart contract. If you've not done so already, download Core and enable Testnet Mode. To do that, go to Settings and click on Advanced.
+
+Settings image 1
+
+Here, turn on the Testnet Mode feature. This will automatically make Core switch to Fuji Testnet.
+
+Settings image 2
+
+Note
+
+If you are using other wallets, like Core or MetaMask, you can add the Fuji Testnet using the following specs:
+
+Network Name: Avalanche C-Chain
+New RPC URL: https://api.avax-test.network/ext/bc/C/rpc
+ChainID: 43113
+Symbol: AVAX
+Explorer: https://testnet.snowtrace.io
+Getting Testnet Funds
+Because we're deploying on the Fuji Network, you'll need to get AVAX on the Fuji network. Avalanche has a Faucet that drips test tokens to the address of your choice. If you already have an AVAX balance greater than zero on Mainnet, paste your C-Chain address there, and request test tokens. Otherwise, please request a faucet coupon on Guild. Admins and mods on the official Discord can provide testnet AVAX if developers are unable to obtain it from the other two options.
+
+Avalanche Faucet
+
+Creating the Smart Contract
+To create the smart contract, we're going to use Open Zeppelin. Open Zeppelin is a key tool for building smart contracts quickly and easily. While we're only scratching the surface in this tutorial, ample documentation is available on their website for you to read when you want to build more complex contracts.
+
+Open Zeppelin provides a Contract Wizard that will build out ERC contracts. To avoid any complex coding environments, we'll use this to create our ERC-721 contract.
+
+Contract Wizard
+
+Select ERC-721 on the Contract Wizard to get started. This will create the contract in the Solidity programming language.
+
+As you can see, the template contract is bare-boned. We'll fill out the information in the left panel to auto-populate it into our contract. Make sure you change to the ERC-721 tab as you get started to make the proper contract.
+
+The Wizard auto-fills in a name and symbol for your NFT collection, which we'll modify here. I'm naming it Photography and giving it the symbol FOTO. If you chose your own files to use during this tutorial, you can choose a relevant name and symbol for your collection.
+
+The Base URI field listed here is the URL of the metadata folder uploaded to Pinata(for example, ours is https://gateway.pinata.cloud/ipfs/QmYdWxbiwsfsYcW1CYQPgYujAc9FMLPG3fgFcxFskbSsFa). Paste that into the Base URI field. After the Wizard adds our variables to the template, our contract should look like this:
+
+Contract Wizard Populated
+
+Next, we'll want to check the Mintable and Auto Increment Ids boxes. This will populate a mint function into our template that would handle the incrementing of token Ids on mint if we had more than one NFT in our collection. We still want it to auto-assign our 1 NFT, so we'll check it.
+
+This automatically checks the Ownable button, which gives the safeMint function the onlyOwner modifier. This modifier indicates that only the owner of the smart contract will be able to successfully call the function.
+
+Note
+
+This modifier should be removed when creating a smart contract for a public mint. Otherwise, users wouldn't be able to successfully mint the NFTs when calling the safeMint function. This tutorial only handles the owner's wallet address, so it is being left in.
+
+Now, our contract is a little more populated:
+
+Contract Wizard SafeMint
+
+For this simple example, we'll not add any additional functionality to the safeMint function. Currently, it mints one NFT to the address specified in the function call. There is no cost to mint the NFT other than the gas fee for the transaction itself.
+
+This safeMint function currently doubles as an airdrop function because the address the NFT is minted to does not need to be the function owner. This functionality becomes very useful when NFT collection owners want to give away NFTs for free outside of the normal minting window.
+
+At this point, our smart contract is ready. At the top, you can click Open in Remix to get ready to deploy your smart contract.
+
+Contract Wizard Open Remix
+
+Deploying the Smart Contract with Remix
+Remix IDE is a solidity compiler that allows you to edit, compile, and deploy your smart contract. This will prevent you from needing to download any other coding environments at this stage.
+
+Once you've imported your contract, the first thing you need to do is compile it. Hit the Compile button on the left-hand side. You could also use the keyboard shortcut Ctrl / Command + S.
+
+Remix Compile
+
+Once completed, you'll get a green checkmark on the far left tab and will see options to Publish on IPFS or Swarm. Those aren't important to our tutorial. Next, you'll click on the bottom tab on the left-hand side to move to the deployment page.
+
+Remix Deploy Page
+
+Now, we need to change the environment that Remix will try to use to deploy the smart contract. Click on the Environment drop-down, and select Injected web3.
+
+Remix Web3
+
+This should prompt you to connect with your Core account. Once connected, you can verify the correct connection by checking that the Account number matches your Core address.
+
+Remix account
+
+Core account
+
+Now click on the Contract drop-down and select the contract you created and compiled. It should show up with the name you gave it in the Open Zeppelin Wizard.
+
+Remix Contract
+
+Now, click deploy. This will open Core and ask you to confirm the transaction. Click Confirm.
+
+Core Accept
+
+It may take a second, but once completed, your newly deployed contract will appear underneath the Transactions Recorded field.
+
+Remix Record
+
+Copy your contract's address and open the Snowtrace Testnet Explorer. Paste your contract address in the search bar, and click Search.
+
+You'll now see your contract information on Snowtrace. The first transaction you see should be the contract deployment you just did in the Remix IDE.
+
+Snowtrace
+
+Minting an NFT
+Now that you've deployed the contract, you can mint the NFT. Go back to the Remix IDE tab and click on your contract to expand its information. A list of functions will appear that you can interact with.
+
+Remix Functions
+
+The only function you're interested in is the safeMint function. Click the drop-down arrow for the function to expand the address field.
+
+
+
+Now, copy your Core address and paste it into this address field. This will send the NFT to your address when the mint function is called. After, hit transact.
+
+This will reopen Core and ask you to verify the transaction. Click Confirm to mint your NFT.
+
+Once the transaction has been confirmed, you'll see a green checkmark in the terminal at the bottom of the Remix IDE.
+
+Remix Confirm Mint
+
+Head back to the Snowtrace Testnet explorer page for your contract and refresh it. You should now see a second transaction, your call to safeMint.
+
+Snowtrace Mint
+
+By clicking on the TX Hash, you see that your NFT was created!
+
+Snowtrace Transaction
+
+On Mainnet
+All of the above steps can be used on Mainnet except the following changes:
+
+Make sure that you switch to the Avalanche C-Chain in Core.
+Make sure that you have AVAX tokens in your account to cover transaction costs.
+You should use the Mainnet version of Snowtrace Explorer to view transactions.
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Deploy NFT Collection
+
+Next
+
+Prepare NFT Files
+
+On this page
+Preparing Your NFT Files
+Preparing Your Environment
+Core Extension
+Getting Testnet Funds
+Creating the Smart Contract
+Deploying the Smart Contract with Remix
+Minting an NFT
+On Mainnet
+
+Deploy ERC-721 Contract | Avalanche Builder Hub
+
+
+
+
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Deploy NFT Collection
+Prepare NFT Files
+Learn how to prepare your NFT files.
+
+The first step of setting up an NFT smart contract is having your NFT files ready to use. In this example, the files will get uploaded to Pinata, a pinning service that prevents files from being garbage collected on IPFS. If you don't already have an account, please create one.
+
+Preparing the Images​
+This tutorial will create only 1 NFT, however, if you're interested in creating more, you're more than welcome to do so. The image I'm using is linked here if you'd like to use it.
+
+Original NFT Photo
+
+Place your image file in a folder on your computer. Name this image 0, so it'll be the first image pulled from the smart contract. it'll be the first (and only) NFT in this collection, however, if you're adding more images you'd continue naming them in sequential numeric order. you'll upload this folder to Pinata once your images are organized and named correctly.
+
+info
+
+NOTE: Some projects start file names with 0, and others with 1. That choice will need to be consistent with the smart contract code. To be consistent with this ERC-721 tutorial, we'll name this file 0.
+
+Image Folder
+
+After you log into Pinata, you'll see your dashboard. you'll see the upload button on the left. Click Upload, and then Folder.
+
+Pinata Dashboard
+
+Folder Button
+
+You'll then select the folder that the image is in. You may get a pop-up from your browser confirming you want to upload the folder and the files in it. If you do, confirm by clicking Upload.
+
+Confirm Upload
+
+You'll then be prompted to name the folder you've uploaded. This is beneficial when you have several sets of folders uploaded to Pinata and are trying to keep them organized. After giving it a name, click Upload and wait for your file to upload. The quantity and size of the images could affect the upload time, but if you're starting small, it should only take a few seconds.
+
+Once the upload is complete, you'll see your folder in your dashboard.
+
+Uploaded Image Folder
+
+If you click on the folder name, it'll redirect you to the Pinata gateway to be able to view your newly uploaded files. If you have a paid Pinata account, it'll open the folder through your own gateway. Having a paid plan and personal gateway is NOT required for this tutorial but is recommended to have for larger collection sizes and hosting multiple folders.
+
+If you right-click on the image, you can copy the image's url. This URL is important. Copy this down to use in the next step as we set up the metadata. For this example, my URL is https://gateway.pinata.cloud/ipfs/QmPWbixyMsaNkR9v612bBFbncKGmgXDKz9CgMtDDD7Bymw/0.png
+
+Now that we have the image uploaded and its URL, we can create the matching metadata file for it.
+
+Where this NFT is going to be an ERC-721, we know we can use metadata standards often found on Marketplaces such as Joepegs.com. The .json file below is an example of what the metadata should look like.
+
+
+{
+  "name": "",
+  "tokenId": 0,
+  "image": "",
+  "description": "",
+  "attributes": []
+}
+Now, we'll populate the values into the metadata file. You can choose any name and description that you want.
+
+The tokenId here will be 0 so that it corresponds to the image we just uploaded. If uploading multiple files, this needs to be incremented in each file.
+
+The image link is the URL we saved from the last step of the previous section. Paste that link here so the smart contract knows where to find the image file for your NFT. If uploading multiple files, the end of the URL (the specific image) needs to increment in each file.
+
+The attributes field isn't quite as important here, but if you were uploading NFTs with several layers, the attributes would be the information of those specific layers. This is often used when calculating the rarity of NFTs to be able to rank them by how frequently their layers appear throughout the entire collection. it'll be erased in this tutorial.
+
+Below is an example of how you'd fill out the fields in the metadata file.
+
+
+{
+  "name": "Cool Photography",
+  "tokenId": 0,
+  "image": "https://gateway.pinata.cloud/ipfs/QmPWbixyMsaNkR9v612bBFbncKGmgXDKz9CgMtDDD7Bymw/0.png",
+  "description": "A cool image"
+}
+When saving this file, you want it to share the same name as the image it corresponds to. In this case, it is 0.
+
+Once the metadata file is uploaded to Pinata, the file extension will actually not be needed. it'll search for the file as a directory and be able to pull its information from there. To remove the file extension, follow these steps for a Mac environment, or these for a Windows environment.
+
+Now that the file extension has been removed, place it in another folder as you did with the image file. They need to be SEPARATE folders.
+
+Metadata Folder
+
+You'll now repeat the folder upload process to add the metadata to Pinata. Follow the same steps as above. Once completed, you'll have both folders available on your dashboard.
+
+Uploaded Folders
+
+Click on the metadata folder to be directed to the IPFS gateway and save the URL. This URL will be your base URL and won't need the direct file links. The smart contract will append the necessary file information for each NFT as needed. For example, my URL is https://gateway.pinata.cloud/ipfs/QmYdWxbiwsfsYcW1CYQPgYujAc9FMLPG3fgFcxFskbSsFa.
+
+Now that the image and metadata files are ready, we can prepare to deploy a smart contract by following this ERC-721 tutorial.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Deploy ERC-721 Contract
+
+Next
+
+Toolchains
+
+On this page
+Preparing the Images​
+
+Prepare NFT Files | Avalanche Builder Hub
+
+
+
+
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Toolchains
+Hardhat
+Learn how to write, test and deploy smart contracts to Avalanche's C-Chain with Hardhat.
+
+The goal of this guide is to lay out best practices regarding writing, testing and deployment of smart contracts to Avalanche's C-Chain. We'll be building smart contracts with Hardhat.
+
+Prerequisites
+NodeJS and Yarn
+First, install the LTS (long-term support) version of NodeJS. This is 18.x at the time of writing. NodeJS bundles npm.
+
+Next, install yarn.
+
+AvalancheGo and Avalanche Network Runner
+AvalancheGo is an Avalanche node implementation written in Go. Avalanche Network Runner is a tool to quickly deploy local test networks. Together, you can deploy local test networks and run tests on them.
+
+Solidity and Avalanche
+It is also helpful to have a basic understanding of Solidity and Avalanche.
+
+Dependencies
+Clone the quickstart repository and install the necessary packages via yarn.
+
+
+git clone https://github.com/ava-labs/avalanche-smart-contract-quickstart.git
+cd avalanche-smart-contract-quickstart
+yarn install
+Note
+
+The repository cloning method used is HTTPS, but SSH can be used too:
+
+git clone git@github.com:ava-labs/avalanche-smart-contract-quickstart.git
+
+You can find more about SSH and how to use it here.
+
+Write Contracts
+Edit the ExampleERC20.sol contract in contracts/. ExampleERC20.sol is an Open Zeppelin ERC20 contract. ERC20 is a popular smart contract interface. You can also add your own contracts.
+
+Hardhat Config
+Hardhat uses hardhat.config.js as the configuration file. You can define tasks, networks, compilers and more in that file. For more information see here.
+
+Here is an example pre-configured hardhat.config.ts.
+
+hardhat.config.ts
+
+import { task } from "hardhat/config";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber } from "ethers";
+import "@nomiclabs/hardhat-waffle";
+ 
+// When using the hardhat network, you may choose to fork Fuji or Avalanche Mainnet
+// This will allow you to debug contracts using the hardhat network while keeping the current network state
+// To enable forking, turn one of these booleans on, and then run your tasks/scripts using ``--network hardhat``
+// For more information go to the hardhat guide
+// https://hardhat.org/hardhat-network/
+// https://hardhat.org/guides/mainnet-forking.html
+const FORK_FUJI = false;
+const FORK_MAINNET = false;
+const forkingData = FORK_FUJI
+  ? {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+    }
+  : FORK_MAINNET
+  ? {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+    }
+  : undefined;
+ 
+export default {
+  solidity: {
+    compilers: [
+      {
+        version: "0.5.16",
+      },
+      {
+        version: "0.6.2",
+      },
+      {
+        version: "0.6.4",
+      },
+      {
+        version: "0.7.0",
+      },
+      {
+        version: "0.8.0",
+      },
+    ],
+  },
+  networks: {
+    hardhat: {
+      gasPrice: 225000000000,
+      chainId: !forkingData ? 43112 : undefined, //Only specify a chainId if we are not forking
+      forking: forkingData,
+    },
+    local: {
+      url: "http://localhost:9650/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43112,
+      accounts: [
+        "0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027",
+        "0x7b4198529994b0dc604278c99d153cfd069d594753d471171a1d102a10438e07",
+        "0x15614556be13730e9e8d6eacc1603143e7b96987429df8726384c2ec4502ef6e",
+        "0x31b571bf6894a248831ff937bb49f7754509fe93bbd2517c9c73c4144c0e97dc",
+        "0x6934bef917e01692b789da754a0eae31a8536eb465e7bff752ea291dad88c675",
+        "0xe700bdbdbc279b808b1ec45f8c2370e4616d3a02c336e68d85d4668e08f53cff",
+        "0xbbc2865b76ba28016bc2255c7504d000e046ae01934b04c694592a6276988630",
+        "0xcdbfd34f687ced8c6968854f8a99ae47712c4f4183b78dcc4a903d1bfe8cbf60",
+        "0x86f78c5416151fe3546dece84fda4b4b1e36089f2dbc48496faf3a950f16157c",
+        "0x750839e9dbbd2a0910efe40f50b2f3b2f2f59f5580bb4b83bd8c1201cf9a010a",
+      ],
+    },
+    fuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43113,
+      accounts: [],
+    },
+    mainnet: {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43114,
+      accounts: [],
+    },
+  },
+};
+This configures necessary network information to provide smooth interaction with Avalanche. There are also some pre-defined private keys for testing on a local test network.
+
+Note
+
+The port in this tutorial uses 9650. Depending on how you start your local network, it could be different.
+
+Hardhat Tasks
+You can define custom hardhat tasks in hardhat.config.ts. There are two tasks included as examples: accounts and balances.
+
+hardhat.config.ts
+
+task(
+  "accounts",
+  "Prints the list of accounts",
+  async (args, hre): Promise<void> => {
+    const accounts: SignerWithAddress[] = await hre.ethers.getSigners();
+    accounts.forEach((account: SignerWithAddress): void => {
+      console.log(account.address);
+    });
+  }
+);
+ 
+task(
+  "balances",
+  "Prints the list of AVAX account balances",
+  async (args, hre): Promise<void> => {
+    const accounts: SignerWithAddress[] = await hre.ethers.getSigners();
+    for (const account of accounts) {
+      const balance: BigNumber = await hre.ethers.provider.getBalance(
+        account.address
+      );
+      console.log(`${account.address} has balance ${balance.toString()}`);
+    }
+  }
+);
+npx hardhat accounts prints the list of accounts.
+npx hardhat balances prints the list of AVAX account balances.
+As with other yarn scripts, you can pass in a --network flag to hardhat tasks.
+
+Accounts
+Prints a list of accounts on the local Avalanche Network Runner network.
+
+
+npx hardhat accounts --network local
+0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC
+0x9632a79656af553F58738B0FB750320158495942
+0x55ee05dF718f1a5C1441e76190EB1a19eE2C9430
+0x4Cf2eD3665F6bFA95cE6A11CFDb7A2EF5FC1C7E4
+0x0B891dB1901D4875056896f28B6665083935C7A8
+0x01F253bE2EBF0bd64649FA468bF7b95ca933BDe2
+0x78A23300E04FB5d5D2820E23cc679738982e1fd5
+0x3C7daE394BBf8e9EE1359ad14C1C47003bD06293
+0x61e0B3CD93F36847Abbd5d40d6F00a8eC6f3cfFB
+0x0Fa8EA536Be85F32724D57A37758761B86416123
+Balances
+Prints a list of accounts and their corresponding AVAX balances on the local Avalanche Network Runner network.
+
+
+npx hardhat balances --network local
+0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC has balance 50000000000000000000000000
+0x9632a79656af553F58738B0FB750320158495942 has balance 0
+0x55ee05dF718f1a5C1441e76190EB1a19eE2C9430 has balance 0
+0x4Cf2eD3665F6bFA95cE6A11CFDb7A2EF5FC1C7E4 has balance 0
+0x0B891dB1901D4875056896f28B6665083935C7A8 has balance 0
+0x01F253bE2EBF0bd64649FA468bF7b95ca933BDe2 has balance 0
+0x78A23300E04FB5d5D2820E23cc679738982e1fd5 has balance 0
+0x3C7daE394BBf8e9EE1359ad14C1C47003bD06293 has balance 0
+0x61e0B3CD93F36847Abbd5d40d6F00a8eC6f3cfFB has balance 0
+0x0Fa8EA536Be85F32724D57A37758761B86416123 has balance 0
+Notice that the first account is already funded. This is because this address is pre-funded in the local network genesis file.
+
+ERC20 Balances
+hardhat.config.ts
+
+task(
+  "check-erc20-balance",
+  "Prints out the ERC20 balance of your account"
+).setAction(async function (taskArguments, hre) {
+  const genericErc20Abi = require("./erc20.abi.json");
+  const tokenContractAddress = "0x...";
+  const provider = ethers.getDefaultProvider(
+    "https://api.avax.network/ext/bc/C/rpc"
+  );
+  const contract = new ethers.Contract(
+    tokenContractAddress,
+    genericErc20Abi,
+    provider
+  );
+  const balance = await contract.balanceOf("0x...");
+  console.log(`Balance in wei: ${balance}`);
+});
+This will return the result in wei. If you want to know the exact amount of token with its token name then you need to divide it with its decimal. erc20.abi.json can be found here.
+
+The example uses the C-Chain Public API for the provider. For a local Avalanche network use http://127.0.0.1:9650/ext/bc/C/rpc and for Fuji Testnet use https://api.avax-test.network/ext/bc/C/rpc.
+
+Hardhat Help
+Run yarn hardhat to list Hardhat's version, usage instructions, global options and available tasks.
+
+Typical Avalanche Network Runner Workflow
+Run Avalanche Network Runner
+First confirm you have the latest AvalancheGo built.
+
+
+cd /path/to/avalanchego
+git fetch -p
+git checkout master
+./scripts/build.sh
+(Note that you can also download pre-compiled AvalancheGo binaries rather than building from source.)
+
+Confirm you have Avalanche Network Runner installed by following the steps listed here
+
+Start Avalanche Network Runner and run a script to start a new local network.
+
+Start the Server
+
+cd /path/to/Avalanche-Network-Runner
+ 
+# next command
+avalanche-network-runner server \
+--log-level debug \
+--port=":8080" \
+--grpc-gateway-port=":8081"
+Start a New Avalanche Network with Five Nodes
+
+# replace execPath with the path to AvalancheGo on your machine
+# e.g., ${HOME}/go/src/github.com/ava-labs/avalanchego/build/avalanchego
+ 
+AVALANCHEGO_EXEC_PATH="avalanchego"
+
+avalanche-network-runner control start \
+--log-level debug \
+--endpoint="0.0.0.0:8080" \
+--number-of-nodes=5 \
+--avalanchego-path ${AVALANCHEGO_EXEC_PATH}
+Now you're running a local Avalanche network with 5 nodes.
+
+Fund Accounts
+Transfer 1,000 AVAX from the X-Chain to each of the 10 accounts in hardhat.config.ts with the script fund-cchain-addresses. Funding these accounts is a prerequisite for deploying and interacting with smart contracts.
+
+Note: If you see Error: Invalid JSON RPC response: "API call rejected because chain is not done bootstrapping", you need to wait until network is bootstrapped and ready to use. It should not take too long.
+
+
+cd /path/to/avalanche-smart-contract-quickstart
+yarn fund-cchain-addresses
+Confirm each of the accounts are funded with 1000 AVAX.
+
+
+yarn balances --network local
+ 
+# output
+yarn run v1.22.4
+npx hardhat balances --network local
+0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC has balance 50000001000000000000000000
+0x9632a79656af553F58738B0FB750320158495942 has balance 1000000000000000000
+0x55ee05dF718f1a5C1441e76190EB1a19eE2C9430 has balance 1000000000000000000
+0x4Cf2eD3665F6bFA95cE6A11CFDb7A2EF5FC1C7E4 has balance 1000000000000000000
+0x0B891dB1901D4875056896f28B6665083935C7A8 has balance 1000000000000000000
+0x01F253bE2EBF0bd64649FA468bF7b95ca933BDe2 has balance 1000000000000000000
+0x78A23300E04FB5d5D2820E23cc679738982e1fd5 has balance 1000000000000000000
+0x3C7daE394BBf8e9EE1359ad14C1C47003bD06293 has balance 1000000000000000000
+0x61e0B3CD93F36847Abbd5d40d6F00a8eC6f3cfFB has balance 1000000000000000000
+0x0Fa8EA536Be85F32724D57A37758761B86416123 has balance 1000000000000000000
+✨  Done in 0.72s.
+Send each of the accounts some AVAX from the first account.
+
+
+yarn send-avax-wallet-signer --network local
+ 
+# output
+yarn run v1.22.4
+npx hardhat run scripts/sendAvaWalletSigner.ts --network local
+Seeding addresses with AVAX
+✨  Done in 1.33s.
+Confirm that the balances are updated
+
+
+yarn balances --network local
+ 
+# output
+yarn run v1.22.4
+npx hardhat balances --network local
+0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC has balance 49999999995275000000000000
+0x9632a79656af553F58738B0FB750320158495942 has balance 1000010000000000000000
+0x55ee05dF718f1a5C1441e76190EB1a19eE2C9430 has balance 1000010000000000000000
+0x4Cf2eD3665F6bFA95cE6A11CFDb7A2EF5FC1C7E4 has balance 1000010000000000000000
+0x0B891dB1901D4875056896f28B6665083935C7A8 has balance 1000010000000000000000
+0x01F253bE2EBF0bd64649FA468bF7b95ca933BDe2 has balance 1000010000000000000000
+0x78A23300E04FB5d5D2820E23cc679738982e1fd5 has balance 1000010000000000000000
+0x3C7daE394BBf8e9EE1359ad14C1C47003bD06293 has balance 1000010000000000000000
+0x61e0B3CD93F36847Abbd5d40d6F00a8eC6f3cfFB has balance 1000010000000000000000
+0x0Fa8EA536Be85F32724D57A37758761B86416123 has balance 1000010000000000000000
+Note: If you see Error HH108: Cannot connect to the network local. Please make sure your node is running, and check your internet connection and networks config, ensure that you are using a valid Node Port. See which ports the Nodes are using by running the command:
+
+
+cd /path/to/avalanche-network-runner
+ 
+# next command
+avalanche-network-runner control uris \
+--log-level debug \
+--endpoint="0.0.0.0:8080"
+Compile Smart Contracts
+In package.json there's a compile script.
+
+package.json
+
+"compile": "npx hardhat compile",
+Run yarn compile to make sure your project compiles.
+
+
+yarn compile
+ 
+# output
+yarn run v1.22.4
+rimraf ./build/
+npx hardhat compile
+Compiling 1 file with 0.6.4
+Compilation finished successfully
+✨  Done in 2.13s.
+Deploy Smart Contracts
+Hardhat enables deploying to multiple environments. In package.json there is a script for deploying.
+
+Edit the deployment script in scripts/deploy.ts
+
+
+"deploy": "npx hardhat run scripts/deploy.ts"
+You can choose which environment that you want to deploy to by passing in the --network flag with local (for example a local network created with Avalanche Network Runner), fuji, or mainnet for each respective environment. If you don't pass in --network then it will default to the hardhat network. For example, if you want to deploy to Mainnet:
+
+
+yarn deploy --network mainnet
+Deploy the contract to your local network:
+
+
+yarn deploy --network local
+ 
+# output
+yarn run v1.22.4
+npx hardhat run scripts/deploy.ts --network local
+Coin deployed to: 0x17aB05351fC94a1a67Bf3f56DdbB941aE6
+✨  Done in 1.28s.
+We now have a token deployed at 0x17aB05351fC94a1a67Bf3f56DdbB941aE6.
+
+Interact with Smart Contract
+Hardhat has a developer console to interact with contracts and the network. For more information about Hardhat's console see here. Hardhat console is a NodeJS-REPL, and you can use different tools in it. Ethers is the library that we'll use to interact with our network.
+
+You can open console with:
+
+
+yarn console --network local
+ 
+# output
+yarn run v1.22.11
+npx hardhat console --network local
+Welcome to Node.js v16.2.0.
+Type ".help" for more information.
+Get the contract instance with factory and contract address to interact with our contract:
+
+
+> const Coin = await ethers.getContractFactory('ExampleERC20');
+undefined
+> const coin = await Coin.attach('0x17aB05351fC94a1a67Bf3f56DdbB941aE6')
+undefined
+The first line retrieves contract factory with ABI & bytecode. The second line retrieves an instance of that contract factory with given contract address. Recall that our contract was already deployed to 0x17aB05351fC94a1a67Bf3f56DdbB941aE6 in the previous step.
+
+Fetch the accounts:
+
+
+> let accounts = await ethers.provider.listAccounts()
+undefined
+> accounts
+[
+  '0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC',
+  '0x9632a79656af553F58738B0FB750320158495942',
+  '0x55ee05dF718f1a5C1441e76190EB1a19eE2C9430',
+  '0x4Cf2eD3665F6bFA95cE6A11CFDb7A2EF5FC1C7E4',
+  '0x0B891dB1901D4875056896f28B6665083935C7A8',
+  '0x01F253bE2EBF0bd64649FA468bF7b95ca933BDe2',
+  '0x78A23300E04FB5d5D2820E23cc679738982e1fd5',
+  '0x3C7daE394BBf8e9EE1359ad14C1C47003bD06293',
+  '0x61e0B3CD93F36847Abbd5d40d6F00a8eC6f3cfFB',
+  '0x0Fa8EA536Be85F32724D57A37758761B86416123'
+]
+This is exactly the same account list as in yarn accounts.
+
+Now we can interact with our ERC-20 contract:
+
+
+> let value = await coin.balanceOf(accounts[0])
+undefined
+> value.toString()
+'123456789'
+> value = await coin.balanceOf(accounts[1])
+BigNumber { _hex: '0x00', _isBigNumber: true }
+> value.toString()
+'0'
+account[0] has a balance because account[0] is the default account. The contract is deployed with this account. The constructor of ERC20.sol mints TOTAL_SUPPLY of 123456789 token to the deployer of the contract.
+
+accounts[1] currently has no balance. Send some tokens to accounts[1], which is 0x9632a79656af553F58738B0FB750320158495942.
+
+
+> let result = await coin.transfer(accounts[1], 100)
+undefined
+> result
+{
+  hash: '0x35eec91011f9089ba7689479617a90baaf8590395b5c80bb209fa7000e4848a5',
+  type: 0,
+  accessList: null,
+  blockHash: null,
+  blockNumber: null,
+  transactionIndex: null,
+  confirmations: 0,
+  from: '0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC',
+  gasPrice: BigNumber { _hex: '0x34630b8a00', _isBigNumber: true },
+  gasLimit: BigNumber { _hex: '0x8754', _isBigNumber: true },
+  to: '0x17aB05351fC94a1a67Bf3f56DdbB941aE6c63E25',
+  value: BigNumber { _hex: '0x00', _isBigNumber: true },
+  nonce: 3,
+  data: '0xa9059cbb0000000000000000000000009632a79656af553f58738b0fb7503201584959420000000000000000000000000000000000000000000000000000000000000064',
+  r: '0xc2b9680771c092a106eadb2887e5bff41fcda166c8e00f36ae79b196bbc53d36',
+  s: '0x355138cb5e2b9f20c15626638750775cfc9423881db374d732a8549d05ebf601',
+  v: 86260,
+  creates: null,
+  chainId: 43112,
+  wait: [Function (anonymous)]
+}
+Note: Since this is a local network, we did not need to wait until transaction is accepted. However for other networks like fuji or mainnet you need to wait until transaction is accepted with: await result.wait().
+
+Now we can ensure that tokens are transferred:
+
+
+> value = await coin.balanceOf(accounts[0])
+BigNumber { _hex: '0x075bccb1', _isBigNumber: true }
+> value.toString()
+'123456689'
+> value = await coin.balanceOf(accounts[1])
+BigNumber { _hex: '0x64', _isBigNumber: true }
+> value.toString()
+'100'
+As you might noticed there was no "sender" information in await coin.transfer(accounts[1], 100); this is because ethers uses the first signer as the default signer. In our case this is account[0]. If we want to use another account we need to connect with it first.
+
+
+> let signer1 = await ethers.provider.getSigner(1)
+> let contractAsSigner1 = coin.connect(signer1)
+Now we can call the contract with signer1, which is account[1].
+
+
+> await contractAsSigner1.transfer(accounts[0], 5)
+{
+  hash: '0x807947f1c40bb723ac312739d238b62764ae3c3387c6cdbbb6534501577382dd',
+  type: 0,
+  accessList: null,
+  blockHash: null,
+  blockNumber: null,
+  transactionIndex: null,
+  confirmations: 0,
+  from: '0x9632a79656af553F58738B0FB750320158495942',
+  gasPrice: BigNumber { _hex: '0x34630b8a00', _isBigNumber: true },
+  gasLimit: BigNumber { _hex: '0x8754', _isBigNumber: true },
+  to: '0x17aB05351fC94a1a67Bf3f56DdbB941aE6c63E25',
+  value: BigNumber { _hex: '0x00', _isBigNumber: true },
+  nonce: 2,
+  data: '0xa9059cbb0000000000000000000000008db97c7cece249c2b98bdc0226cc4c2a57bf52fc0000000000000000000000000000000000000000000000000000000000000005',
+  r: '0xcbf126dd0b109491d037c5f3af754ef2d0d7d06149082b13d0e27e502d3adc5b',
+  s: '0x5978521804dd15674147cc6b532b8801c4d3a0e94f41f5d7ffaced14b9262504',
+  v: 86259,
+  creates: null,
+  chainId: 43112,
+  wait: [Function (anonymous)]
+}
+Let's check balances now:
+
+
+> value = await coin.balanceOf(accounts[0])
+BigNumber { _hex: '0x075bccb6', _isBigNumber: true }
+> value.toString()
+'123456694'
+> value = await coin.balanceOf(accounts[1])
+BigNumber { _hex: '0x5f', _isBigNumber: true }
+> value.toString()
+'95'
+We've successfully transferred 5 tokes from accounts[1] to accounts[0]
+
+Summary
+Now you have the tools you need to launch a local Avalanche network, create a Hardhat project, as well as create, compile, deploy and interact with Solidity contracts.
+
+Join our Discord Server to learn more and ask any questions you may have.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Foundry
+
+Next
+
+ThirdWeb
+
+On this page
+Prerequisites
+NodeJS and Yarn
+AvalancheGo and Avalanche Network Runner
+Solidity and Avalanche
+Dependencies
+Write Contracts
+Hardhat Config
+Hardhat Tasks
+Accounts
+Balances
+ERC20 Balances
+Hardhat Help
+Typical Avalanche Network Runner Workflow
+Run Avalanche Network Runner
+Start the Server
+Start a New Avalanche Network with Five Nodes
+Fund Accounts
+Compile Smart Contracts
+Deploy Smart Contracts
+Interact with Smart Contract
+Summary
+
+Hardhat | Avalanche Builder Hub
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Toolchains
+ThirdWeb
+Learn how to deploy a smart contract using thirdweb's command line interface.
+
+This tutorial walks through creating and deploying a smart contract using thirdweb's command line interface.
+
+Alternatively, you can deploy a prebuilt contract for NFTs, tokens, or marketplace directly from the thirdweb Explore page:
+
+Go to the thirdweb Explore page: https://thirdweb.com/explore
+Choose the type of contract you want to deploy from the available options: NFTs, tokens, marketplace, and more.
+Follow the on-screen prompts to configure and deploy your contract.
+For more information on different contracts available on Explore, check out thirdweb's documentation.
+
+Creating Contracts
+To create a new smart contract using thirdweb CLI, follow these steps:
+
+In your CLI run the following command:
+
+
+npx thirdweb create contract
+Input your preferences for the command line prompts:
+
+Give your project a name.
+Choose your preferred framework: Hardhat or Foundry.
+Name your smart contract.
+Choose the type of base contract: Empty, ERC20, ERC721, or ERC1155.
+Add any desired extensions.
+Once created, navigate to your project's directory and open in your preferred code editor.
+
+In the contracts folder, you will find the smart contract written in Solidity.
+
+The following is code for an ERC721Base contract without specified extensions. It implements all of the logic inside the ERC721Base.sol contract; which implements ERC721A standard.
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.x;
+ 
+import "@third-web/dev/contracts/base/ERC721Base.sol";
+ 
+contract Contract is ERC721Base {
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address _royaltyRecipient,
+        uint128 _royaltyBps
+    ) ERC721Base(_name,_symbol,_royaltyRecipient,_royaltyBps){}
+ }
+This contract inherits functionality of ERC721Base through following steps:
+
+Importing the ERC721Base contract.
+Inheriting the contract by declaring that our contract is an ERC721Base contract.
+Implementing any required methods such as constructor.
+After modifying your contract with your desired custom logic, you may deploy it on Avalanche with the following command:
+
+
+npx thirdweb deploy
+Deploying Contracts
+Deploy allows you to deploy a smart contract to any EVM compatible network without configuring RPC URLs, exposing your private keys, writing scripts, and other additional setup such as verifying your contract.
+
+To deploy your smart contract using deploy, navigate to the root directory of your project and execute the following command:
+
+
+npx thirdweb deploy
+Executing this command will trigger the following actions:
+
+Compiling all the contracts in the current directory.
+Providing the option to select which contracts you wish to deploy.
+Uploading your contract source code (ABI) to IPFS.
+When it is completed, it will open a dashboard interface to finish filling out the parameters.
+
+_name: contract name
+_symbol: symbol or "ticker"
+_royaltyRecipient: wallet address to receive royalties from secondary sales
+_royaltyBps: basis points that will be given to royalty recipient for each secondary sale. For example: 500 = 5%.
+Select "Avalanche" as the network.
+
+Manage additional settings on your contract's dashboard as needed such as uploading NFTs, configuring permissions, and more.
+
+For additional information on deploying smart contracts with thirdweb, please reference thirdweb's documentation.
+
+If you have any further questions or encounter any issues during the process, please reach out to thirdweb support at support.thirdweb.com.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Hardhat
+
+Next
+
+Using Explorer
+
+On this page
+Creating Contracts
+Deploying Contracts
+
+ThirdWeb | Avalanche Builder Hub
+
+
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Using Explorer
+Learn how to verify a smart contract using the official Avalanche Explorer.
+
+This document outlines the process of verifying a Smart Contract deployed on the Avalanche Network using the official explorer.
+
+Contract Deployment
+Compile the smart contract using the tooling of your choice.
+
+Deploy the compiled smart contract to the Avalanche network.
+
+This can be done on either the mainnet or testnet (depending on your RPC configuration)
+Upon successful deployment, you will receive:
+
+A transaction hash
+A contract address
+Note
+
+Ensure you save the contract address as it will be required for the verification process.
+
+Contract Verification
+Navigate to the official Avalanche Explorer and click on Tools dropdown menu to select Smart Contract Verification interface. You may need to open the Testnet Explorer in case the contract is deployed on Fuji Testnet.
+
+
+Prepare the following files:
+
+The contract's Solidity file (.sol)
+The metadata.json file containing the ABI and metadata
+Upload the required files:
+
+Upload the contract's Solidity file
+Upload the metadata.json file
+Enter the contract address:
+
+Paste the contract address obtained from the deployment step into the designated input field.
+
+
+Initiate verification:
+Click on the Submit Contract button to start the verification process.
+Next Steps
+After submitting the contract for verification, your request will be processed shortly and you will see the below message.
+
+
+
+For any issues during deployment or verification, please reach out to the DevRel/Support team on Discord/Telegram/Slack.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+ThirdWeb
+
+Next
+
+Using Snowtrace
+
+On this page
+Contract Deployment
+Contract Verification
+Next Steps
+
+Using Explorer | Avalanche Builder Hub
+
+
+
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Using Snowtrace
+Learn how to verify a contract on the Avalanche C-chain using Snowtrace.
+
+The C-Chain Explorer supports verifying smart contracts, allowing users to review it. The Mainnet C-Chain Explorer is here and the Fuji Testnet Explorer is here.
+
+If you have issues, contact us on Discord.
+
+Steps
+Navigate to the Contract tab at the Explorer page for your contract's address.
+
+verify and publish
+
+Click Verify & Publish to enter the smart contract verification page.
+
+SRC
+
+Libraries can be provided. If they are, they must be deployed, independently verified and in the Add Contract Libraries section.
+
+libraries
+
+The C-Chain Explorer can fetch constructor arguments automatically for simple smart contracts. More complicated contracts might require you to pass in special constructor arguments. Smart contracts with complicated constructors may have validation issues. You can try this online ABI encoder.
+
+Requirements
+IMPORTANT Contracts should be verified on Testnet before being deployed to Mainnet to ensure there are no issues.
+Contracts must be flattened. Includes will not work.
+Contracts should be compile-able in Remix. A flattened contract with pragma experimental ABIEncoderV2 (as an example) can create unusual binary and/or constructor blobs. This might cause validation issues.
+The C-Chain Explorer only validates solc JavaScript and only supports Solidity contracts.
+Libraries
+The compile bytecode will identify if there are external libraries. If you released with Remix, you will also see multiple transactions created.
+
+
+{
+  "linkReferences": {
+    "contracts/Storage.sol": {
+      "MathUtils": [
+        {
+          "length": 20,
+          "start": 3203
+        }
+        ...
+      ]
+    }
+  },
+  "object": "....",
+  ...
+}
+This requires you to add external libraries in order to verify the code.
+
+A library can have dependent libraries. To verify a library, the hierarchy of dependencies will need to be provided to the C-Chain Explorer. Verification may fail if you provide more than the library plus any dependencies (that is you might need to prune the Solidity code to exclude anything but the necessary classes).
+
+You can also see references in the byte code in the form __$75f20d36....$__. The keccak256 hash is generated from the library name.
+
+Example online converter: contracts/Storage.sol:MathUtils => 75f20d361629befd780a5bd3159f017ee0f8283bdb6da80805f83e829337fd12
+
+Examples
+SwapFlashLoan
+SwapFlashLoan uses swaputils and mathutils:
+
+SwapUtils
+SwapUtils requires mathutils:
+
+MathUtils
+Caveats
+SPDX License Required
+An SPDX must be provided.
+
+
+// SPDX-License-Identifier: ...
+keccak256 Strings Processed
+The C-Chain Explorer interprets all keccak256(...) strings, even those in comments. This can cause issues with constructor arguments.
+
+
+/// keccak256("1");
+keccak256("2");
+This could cause automatic constructor verification failures. If you receive errors about constructor arguments they can be provided in ABI hex encoded form on the contract verification page.
+
+Solidity Constructors
+Constructors and inherited constructors can cause problems verifying the constructor arguments. Example:
+
+
+abstract contract Parent {
+  constructor () {
+    address msgSender = ...;
+    emit Something(address(0), msgSender);
+  }
+}
+contract Main is Parent {
+  constructor (
+          string memory _name,
+          address deposit,
+          uint fee
+  ) {
+    ...
+  }
+}
+If you receive errors about constructor arguments, they can be provided in ABI hex encoded form on the contract verification page.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Using Explorer
+
+Next
+
+Using HardHat
+
+On this page
+Steps
+Requirements
+Libraries
+Examples
+Caveats
+SPDX License Required
+keccak256 Strings Processed
+Solidity Constructors
+
+Using Snowtrace | Avalanche Builder Hub
+
+
+
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Using HardHat
+Learn how to verify a smart contract using Hardhat.
+
+This tutorial assumes that the contract was deployed using Hardhat and that all Hardhat dependencies are properly installed.
+
+After deploying a smart contract one can verify the smart contract on Snowtrace in three steps:
+
+Flatten the Smart Contract
+Clean up the flattened contract
+Verify using the Snowtrace GUI
+Flatten Smart Contract using Hardhat
+To flatten the contract, run the command: npx hardhat flatten <path-to-contract> >> <flat-contract-name>.sol
+
+Cleanup the Flattened Smart Contract
+Some clean-up may be necessary to get the code to compile properly in the Snowtrace Contract Verifier
+
+Remove all but the top SPDX license.
+If the contract uses multiple SPDX licenses, use both licenses by adding AND: SPDX-License-Identifier: MIT AND BSD-3-Clause
+Verify Smart Contract using Snowtrace UI
+Snowtrace is currently working on a new user interface (UI) for smart contract verification. Meanwhile, you may consider using their API for a seamless smart contract verification experience.
+
+Verify Smart Contract Programmatically Using APIs
+Ensure you have Postman or any other API platform installed on your computer (or accessible through online services), along with your contract's source code and the parameters utilized during deployment.
+
+Here is the API call URL to use for a POST request: https://api.snowtrace.io/api?module=contract&action=verifysourcecode
+
+Please note that this URL is specifically configured for verifying contracts on the Avalanche C-Chain Mainnet. If you intend to verify on the Fuji Testnet, use: https://api-testnet.snowtrace.io/api?module=contract&action=verifysourcecode
+
+Here's the body of the API call with the required parameters:
+
+
+{
+  "contractaddress": "YOUR_CONTRACT_ADDRESS",
+  "sourceCode": "YOUR_FLATTENED_SOURCE_CODE",
+  "codeformat": "solidity-single-file",
+  "contractname": "YOUR_CONTRACT_NAME",
+  "compilerversion": "YOUR_COMPILER_VERSION",
+  "optimizationUsed": "YOUR_OPTIMIZATION_VALUE",  // 0 if not optimized, 1 if optimized
+  "runs": "YOUR_OPTIMIZATION_RUNS",  // remove if not applicable
+  "licenseType": "YOUR_LICENSE_TYPE",  // 1 if not specified
+  "apikey": "API_KEY_PLACEHOLDER", // you don't need an API key, use a placeholder
+  "evmversion": "YOUR_EVM_VERSION_ON_REMIX",
+  "constructorArguments": "YOUR_CONSTRUCTOR_ARGUMENTS"  // Remove if not applicable
+}
+Verifying with Hardhat-Verify
+This part of the tutorial assumes that the contract was deployed using Hardhat and that all Hardhat dependencies are properly installed to include '@nomiclabs/hardhat-etherscan'.
+
+You will need to create a .env.json with your Wallet Seed Phrase. You don't need an API key to verify on Snowtrace.
+
+Example .env.json:
+
+.env.json
+
+{
+  "MNEMONIC": "your-wallet-seed-phrase",
+}
+Below is a sample hardhat.config.ts used for deployment and verification:
+
+hardhat.config.ts
+
+import { task } from "hardhat/config"
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
+import { BigNumber } from "ethers"
+import "@typechain/hardhat"
+import "@nomiclabs/hardhat-ethers"
+import "@nomiclabs/hardhat-waffle"
+import "hardhat-gas-reporter"
+import "@nomiclabs/hardhat-etherscan"
+import { MNEMONIC, APIKEY } from "./.env.json"
+ 
+// When using the hardhat network, you may choose to fork Fuji or Avalanche Mainnet
+// This will allow you to debug contracts using the hardhat network while keeping the current network state
+// To enable forking, turn one of these booleans on, and then run your tasks/scripts using ``--network hardhat``
+// For more information go to the hardhat guide
+// https://hardhat.org/hardhat-network/
+// https://hardhat.org/guides/mainnet-forking.html
+const FORK_FUJI = false
+const FORK_MAINNET = false
+const forkingData = FORK_FUJI
+  ? {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+    }
+  : FORK_MAINNET
+  ? {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+    }
+  : undefined
+ 
+task(
+  "accounts",
+  "Prints the list of accounts",
+  async (args, hre): Promise<void> => {
+    const accounts: SignerWithAddress[] = await hre.ethers.getSigners()
+    accounts.forEach((account: SignerWithAddress): void => {
+      console.log(account.address)
+    })
+  }
+)
+ 
+task(
+  "balances",
+  "Prints the list of AVAX account balances",
+  async (args, hre): Promise<void> => {
+    const accounts: SignerWithAddress[] = await hre.ethers.getSigners()
+    for (const account of accounts) {
+      const balance: BigNumber = await hre.ethers.provider.getBalance(
+        account.address
+      )
+      console.log(`${account.address} has balance ${balance.toString()}`)
+    }
+  }
+)
+export default {
+  etherscan: {
+    // Your don't need an API key for Snowtrace
+  },
+ 
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.0",
+      },
+      {
+        version: "0.8.10",
+      },
+    ],
+  },
+  networks: {
+    hardhat: {
+      gasPrice: 225000000000,
+      chainId: 43114, //Only specify a chainId if we are not forking
+      // forking: {
+      //   url: 'https://api.avax.network/ext/bc/C/rpc',
+      // },
+    },
+    fuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43113,
+      accounts: { mnemonic: MNEMONIC },
+    },
+    mainnet: {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      gasPrice: 225000000000,
+      chainId: 43114,
+      accounts: { mnemonic: MNEMONIC },
+    },
+  },
+}
+Once the contract is deployed, verify with hardhat verify by running the following:
+
+
+npx hardhat verify <contract address> <arguments> --network <network>
+Example:
+
+
+npx hardhat verify 0x3972c87769886C4f1Ff3a8b52bc57738E82192D5 MockNFT Mock ipfs://QmQ2RFEmZaMds8bRjZCTJxo4DusvcBdLTS6XuDbhp5BZjY 100 --network fuji
+You can also verify contracts programmatically via script. Example:
+
+verify.ts
+
+import console from "console"
+const hre = require("hardhat")
+ 
+// Define the NFT
+const name = "MockNFT"
+const symbol = "Mock"
+const _metadataUri = "ipfs://QmQ2RFEmZaMds8bRjZCTJxo4DusvcBdLTS6XuDbhp5BZjY"
+const _maxTokens = "100"
+ 
+async function main() {
+  await hre.run("verify:verify", {
+    address: "0x3972c87769886C4f1Ff3a8b52bc57738E82192D5",
+    constructorArguments: [name, symbol, _metadataUri, _maxTokens],
+  })
+}
+ 
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
+First create your script, then execute it via hardhat by running the following:
+
+
+npx hardhat run scripts/verify.ts --network fuji
+Verifying via terminal will not allow you to pass an array as an argument, however, you can do this when verifying via script by including the array in your Constructor Arguments. Example:
+
+
+import console from "console"
+const hre = require("hardhat")
+ 
+// Define the NFT
+const name = "MockNFT"
+const symbol = "Mock"
+const _metadataUri =
+  "ipfs://QmQn2jepp3jZ3tVxoCisMMF8kSi8c5uPKYxd71xGWG38hV/Example"
+const _royaltyRecipient = "0xcd3b766ccdd6ae721141f452c550ca635964ce71"
+const _royaltyValue = "50000000000000000"
+const _custodians = [
+  "0x8626f6940e2eb28930efb4cef49b2d1f2c9c1199",
+  "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "0xdd2fd4581271e230360230f9337d5c0430bf44c0",
+]
+const _saleLength = "172800"
+const _claimAddress = "0xcd3b766ccdd6ae721141f452c550ca635964ce71"
+ 
+async function main() {
+  await hre.run("verify:verify", {
+    address: "0x08bf160B8e56899723f2E6F9780535241F145470",
+    constructorArguments: [
+      name,
+      symbol,
+      _metadataUri,
+      _royaltyRecipient,
+      _royaltyValue,
+      _custodians,
+      _saleLength,
+      _claimAddress,
+    ],
+  })
+}
+ 
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Using Snowtrace
+
+Next
+
+Add Network Programmatically
+
+On this page
+Flatten Smart Contract using Hardhat
+Cleanup the Flattened Smart Contract
+Verify Smart Contract using Snowtrace UI
+Verify Smart Contract Programmatically Using APIs
+Verifying with Hardhat-Verify
+
+Using HardHat | Avalanche Builder Hub
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Add Network Programmatically
+This document shows how to integrate Avalanche Network with your dApp, either using Core or MetaMask.
+
+Core
+Powered by Avalanche, Core is an all-in-one operating system bringing together Avalanche apps, Avalanche L1s, bridges, and NFTs in one seamless, high-performance browser experience. Putting in another way, Core is more than a wallet. It is a curated web3 operating system combining Wallet, Explorer, Bridge, Avalanche L1s, dApps, and more.
+
+Getting a Dapp ready to connect to Core is made simple with pre-built tools from the Core Team.
+
+First download and install the Core browser extension from here.
+
+avalanche-dapp-sdks contains an example of how to connect via @web3-react/core to the Core extension specifically.
+
+
+git clone https://github.com/ava-labs/avalanche-dapp-sdks.git
+cd avalanche-dapp-sdks
+yarn bootstrap
+Note
+
+The repository cloning method used is HTTPS, but SSH can be used too:
+
+git clone git@github.com:ava-labs/avalanche-dapp-sdks.git
+
+You can find more about SSH and how to use it here.
+
+Then check out this sample project under packages/avalanche-connector-example
+
+
+cd packages/avalanche-connector-example
+npm start
+If everything works as expected, you should be able to load [http://localhost:3000/\] on your browser, click on the "Connect Avalanche" button on the page as below:
+
+connect core
+
+Check out the README to see details how this works and use it to fit your needs.
+
+This Google Drive has the assets needed to create a Connect with Core button.
+
+MetaMask
+Adding new networks to MetaMask is not a trivial task for people that are not technically savvy, and it can be error prone. To help easier onboarding of users to your application it is useful to simplify that process as much as possible.
+
+This tutorial will show how to build a simple button in your front-end application that will automate the process of adding the Avalanche network to MetaMask.
+
+EIP-3035
+EIP-3035 is an Ethereum Improvement Proposal that defines an RPC method for adding Ethereum-compatible chains to wallet applications.
+
+Since March 2021 MetaMask has implemented that EIP as part of their MetaMask Custom Networks API.
+
+Let's see how it works.
+
+Data Structures
+To add the Avalanche network to MetaMask, we need to prepare the data structures that will be contain all the necessary data.
+
+Main network data:
+
+
+export const AVALANCHE_MAINNET_PARAMS = {
+  chainId: "0xA86A",
+  chainName: "Avalanche Mainnet C-Chain",
+  nativeCurrency: {
+    name: "Avalanche",
+    symbol: "AVAX",
+    decimals: 18,
+  },
+  rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
+  blockExplorerUrls: ["https://snowtrace.io/"],
+};
+Test network data:
+
+
+export const AVALANCHE_TESTNET_PARAMS = {
+  chainId: "0xA869",
+  chainName: "Avalanche Testnet C-Chain",
+  nativeCurrency: {
+    name: "Avalanche",
+    symbol: "AVAX",
+    decimals: 18,
+  },
+  rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
+  blockExplorerUrls: ["https://testnet.snowtrace.io/"],
+};
+Adding the Network
+To add the network to MetaMask, we need to call the wallet_addEthereumChain method, exposed by the web3 provider.
+
+
+function addAvalancheNetwork() {
+  injected.getProvider().then((provider) => {
+    provider
+      .request({
+        method: "wallet_addEthereumChain",
+        params: [AVALANCHE_MAINNET_PARAMS],
+      })
+      .catch((error: any) => {
+        console.log(error);
+      });
+  });
+}
+Where injected is initialized as a web3-react/injected-connector used to interface with MetaMask APIs. Usage for other popular web frameworks is similar. Replace AVALANCHE_MAINNET_PARAMS with AVALANCHE_TESTNET_PARAMS if you want to add the test network.
+
+Typical usage pattern would be to expose a button calling that method if you get Wrong Network or Error connecting errors when attempting to establish a connection to MetaMask.
+
+User Experience
+When users first come to your dapp's website they need to approve connection to MetaMask. After they do that, if you don't detect successful web3 network connection, you can present them with a dialog asking them to confirm switch to a new network:
+
+wrong network
+
+If they press the button, they are shown a dialog from MetaMask asking for approval to add the new network:
+
+add a network
+
+If they approve, your app will be connected to the Avalanche network. Very easy, no need for any data entry, no chance of wrong data entry. And that's it, users are ready to interact with your dapp!
+
+Conclusion
+Dapp users are often not very technically sophisticated and onboarding them needs to be as seamless and easy as possible. Manually adding a new network is a hurdle than a certain percentage of your potential users will not be able to clear. Removing that requirement is a simple step that will enhance their experience and enable more users to get to actually use your dapp.
+
+If you have any questions, problems, or ideas on how to improve, or simply want to join our developer community, you can contact us on our Discord server.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Using HardHat
+
+Next
+
+Dynamic Gas Fees
+
+On this page
+Core
+MetaMask
+EIP-3035
+Data Structures
+Adding the Network
+User Experience
+Conclusion
+
+Add Network Programmatically | Avalanche Builder Hub
+
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Dynamic Gas Fees
+Learn how to send transactions with dynamic fees using JavaScript.
+
+The objective of this document is to provide and explain sending transactions with dynamic fees using JavaScript. Make sure you have followed the tutorial on adjusting the dynamic fees using MetaMask. There, we have explained the key concepts related to dynamic fees and EIP1559 type of transactions.
+
+Prerequisites
+Basic familiarity with JavaScript.
+Basic familiarity with Node.js and npm.
+Basic familiarity with the Avalanche C-Chain network and EVM compatibility
+Basic understanding of dynamic fee transactions
+Installing Dependencies
+Open the terminal and install the following dependencies in a new folder.
+
+Ethers
+avalanche
+dotenv
+
+npm install ethers avalanche dotenv
+Setting up Environment and Project
+To send a transaction we need to sign it using our private key. But private key should not be hard coded in the code, rather must be fetched through some environment variables. Make a .env file in the root folder with the following content.
+
+
+PRIVATEKEY=<YOUR_PRIVATE_KEY>
+Now make a new file app.js in the root folder, which will be our main and only file with the sendAvax() function. Follow the rest of the tutorial by understanding and pasting the provided snippets sequentially in the app.js file.
+
+Importing Dependencies and Private Key
+
+const ethers = require("ethers");
+const Avalanche = require("avalanche").Avalanche;
+require("dotenv").config();
+ 
+const privateKey = process.env.PRIVATEKEY;
+Setting up HTTP Provider
+Using the HTTP provider, we will connect to one of the nodes on the Fuji network. Using this provider we will send the signed transaction to the network. You can also connect to Mainnet using the URL - https://api.avax.network/ext/bc/C/rpc
+
+
+// For sending a signed transaction to the network
+const nodeURL = "https://api.avax-test.network/ext/bc/C/rpc";
+const HTTPSProvider = new ethers.providers.JsonRpcProvider(nodeURL);
+Setup C-Chain APIs to Estimate Fees
+To estimate the max fee and max priority fee on the network, we will be using C-Chain APIs. We can use the C-Chain through an AvalancheJS instance connected to the network as shown below.
+
+
+// For estimating max fee and priority fee using CChain APIs
+const chainId = 43113;
+const avalanche = new Avalanche(
+  "api.avax-test.network",
+  undefined,
+  "https",
+  chainId
+);
+const cchain = avalanche.CChain();
+Function for Estimating Max Fee and Max Priority Fee
+The function calcFeeData() estimates the max fee and max priority fee per gas according to network activity using the C-Chain APIs. This function returns max fee and max priority fee per gas in units of nAVAX or gwei (1 AVAX = 10^9 gwei).
+
+
+// Function to estimate max fee and max priority fee
+const calcFeeData = async (
+  maxFeePerGas = undefined,
+  maxPriorityFeePerGas = undefined
+) => {
+  const baseFee = parseInt(await cchain.getBaseFee(), 16) / 1e9;
+  maxPriorityFeePerGas =
+    maxPriorityFeePerGas == undefined
+      ? parseInt(await cchain.getMaxPriorityFeePerGas(), 16) / 1e9
+      : maxPriorityFeePerGas;
+  maxFeePerGas =
+    maxFeePerGas == undefined ? baseFee + maxPriorityFeePerGas : maxFeePerGas;
+ 
+  if (maxFeePerGas < maxPriorityFeePerGas) {
+    throw "Error: Max fee per gas cannot be less than max priority fee per gas";
+  }
+ 
+  return {
+    maxFeePerGas: maxFeePerGas.toString(),
+    maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+  };
+};
+Actual API returns base fee and priority fee in units of wei which is one-billionth of a billionth of AVAX (1 AVAX = 10^18 wei).
+
+Setting up Wallet
+A wallet is required for signing transactions with your private key and thus making it valid.
+
+
+// For signing an unsigned transaction
+const wallet = new ethers.Wallet(privateKey);
+const address = wallet.address;
+Function to Create, Sign and Send Transaction
+The function sendAvax() takes 4 arguments -
+
+amount - Amount of AVAX to send in the transaction
+address - Destination address to which we want to send AVAX
+maxFeePerGas - Desired maximum fee per gas you want to pay in nAVAX
+maxPriorityFeePerGas - Desired maximum priority fee per gas you want to pay in nAVAX
+nonce - Used as a differentiator for more than 1 transaction with same signer
+The last 3 arguments are optional, and if undefined is passed, then it will use the calcFeeData() function to estimate them. Each transaction with the same data and parameters is differentiated by a nonce value. If there are more than 1 transactions with the same nonce signed by the same address, then only 1 of them with the highest effective priority fee will be accepted. nonce parameter should only be used when you are either re-issuing or cancelling a stuck transaction.
+
+
+// Function to send AVAX
+const sendAvax = async (
+  amount,
+  to,
+  maxFeePerGas = undefined,
+  maxPriorityFeePerGas = undefined,
+  nonce = undefined
+) => {
+  if (nonce == undefined) {
+    nonce = await HTTPSProvider.getTransactionCount(address);
+  }
+ 
+  // If the max fee or max priority fee is not provided, then it will automatically calculate using CChain APIs
+  ({ maxFeePerGas, maxPriorityFeePerGas } = await calcFeeData(
+    maxFeePerGas,
+    maxPriorityFeePerGas
+  ));
+ 
+  maxFeePerGas = ethers.utils.parseUnits(maxFeePerGas, "gwei");
+  maxPriorityFeePerGas = ethers.utils.parseUnits(maxPriorityFeePerGas, "gwei");
+ 
+  // Type 2 transaction is for EIP1559
+  const tx = {
+    type: 2,
+    nonce,
+    to,
+    maxPriorityFeePerGas,
+    maxFeePerGas,
+    value: ethers.utils.parseEther(amount),
+    chainId,
+  };
+ 
+  tx.gasLimit = await HTTPSProvider.estimateGas(tx);
+ 
+  const signedTx = await wallet.signTransaction(tx);
+  const txHash = ethers.utils.keccak256(signedTx);
+ 
+  console.log("Sending signed transaction");
+ 
+  // Sending a signed transaction and waiting for its inclusion
+  await (await HTTPSProvider.sendTransaction(signedTx)).wait();
+ 
+  console.log(
+    `View transaction with nonce ${nonce}: https://testnet.snowtrace.io/tx/${txHash}`
+  );
+};
+This function calculates transaction hash from the signed transaction and logs on the console, the URL for transaction status on the Snowtrace explorer.
+
+Calling the sendAVAX() Function
+There are various ways to call this function. We may or may not pass the optional arguments like max fee and max priority fee. It is recommended to set the max fee as the maximum price per gas that you are willing to pay for a transaction, no matter how high or low the base fee will be, as at max you will only be charged the provided max fee, along with a small priority fee above the base fee.
+
+If you do not pass these arguments, then it will automatically estimate the max fee and priority fee from the network. For example, let's say, I want to pay 100 nAVAX per gas for a transaction and a small tip of 2 nAVAX, then we will call the following function.
+
+
+// setting max fee as 100 and priority fee as 2
+sendAvax("0.01", "0x856EA4B78947c3A5CD2256F85B2B147fEBDb7124", 100, 2);
+This function should not be used without a max fee per gas. As you will have to pay the estimated price, even if it is higher than your budget. There could be the following cases:
+
+Max Fee	Max Priority Fee	Comment
+undefined	2	It will calculate the max fee by adding the provided priority fee with the estimated base fee. Take extra precaution here as the max fee will now be capped by baseFee + priorityFee, which can consume all the provided priority fees.
+100	*undefined-	It will estimate the priority fee and use the provided max fee. If the estimated priority fee is more than the provided max fee, then it throws an error.
+undefined	*undefined-	It will estimate the base fee and priority fee from the network, and will add both the values to calculate the max fee per gas. Again, you have to pay whatever will be estimated.
+You will get the following output on the successful submission of the signed transactions. Using this URL you can view the status of your transaction on Snowtrace.
+
+
+View transaction with nonce 25: https://testnet.snowtrace.io/tx/0xd5b92b85beaf283fbaeeefb95c9a17a6b346a05b6f9687f2d6e421aa79243b35
+Reissuance of Stuck Transaction
+Sometimes during high network activity, all transactions couldn't make it to the latest blocks for a long time, due to relatively lower effective tip than the other transactions in the pool. We can either re-issue the same transaction with a higher priority fee or cancel the transaction. To re-issue the stuck transaction, you can send a new one with same amount and data but higher priority fee and same nonce value as the stuck transaction. The transaction with lower effective tip will automatically be rejected (due to same nonce), and you do not need to worry about it. You can also cancel the stuck transaction, by keeping the amount to 0, with a higher priority fee and same nonce. Let's say, the above transaction with a nonce value of 25 has stuck. You can then re-issue a new transaction with same nonce, but higher priority fee this time.
+
+
+// reissuing transaction with nonce 25
+sendAvax("0.01", "0x856EA4B78947c3A5CD2256F85B2B147fEBDb7124", 100, 10, 25);
+ 
+// cancelling transaction with nonce 25
+sendAvax("0", "0x856EA4B78947c3A5CD2256F85B2B147fEBDb7124", 100, 10, 25);
+Conclusion
+You have learned about creating, signing, and sending transactions with dynamic fee parameters to the C-Chain of Avalanche network using JavaScript. It also explained, how to re-issue or cancel a stuck transaction, by sending a transaction with the same nonce. This tutorial points out the recommended way for choosing max fee cap and max priority fee cap for transactions and can also work as a general guide for all the EVM-based chains.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Add Network Programmatically
+
+Next
+
+Exchange Integration
+
+On this page
+Prerequisites
+Installing Dependencies
+Setting up Environment and Project
+Importing Dependencies and Private Key
+Setting up HTTP Provider
+Setup C-Chain APIs to Estimate Fees
+Function for Estimating Max Fee and Max Priority Fee
+Setting up Wallet
+Function to Create, Sign and Send Transaction
+Calling the sendAVAX() Function
+Reissuance of Stuck Transaction
+Conclusion
+
+Dynamic Gas Fees | Avalanche Builder Hub
+dApps on Avalanche
+Introduction
+When to Build on C-Chain
+Block Explorers
+Smart Contract Development
+Get Test Funds
+Deploy with Remix IDE
+Create an ERC-20 Token
+Deploy NFT Collection
+Deploy ERC-721 Contract
+Prepare NFT Files
+Toolchains
+Foundry
+Hardhat
+ThirdWeb
+Contract Verification
+Using Explorer
+Using Snowtrace
+Using HardHat
+Advanced Tutorials
+Add Network Programmatically
+Dynamic Gas Fees
+Exchange Integration
+Manually Adjust Gas Price
+Fuji Workflow
+Ethereum dApp → Avalanche
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Fuji Workflow
+Learn how to use the Fuji Testnet.
+
+Introduction
+Fuji is the Avalanche network's test network. You can use it to test your dapp or smart contract after you've developed it locally. Fuji is typically on the same version as the Avalanche Mainnet, but sometimes it is running an unreleased version of AvalancheGo.
+
+In general, you can expect Fuji's behavior to be about the same as Avalanche Mainnet. Tools such as a explorers and wallets should work with the Fuji Testnet.
+
+In this tutorial, we'll go through an example Fuji workflow to show how it can be used. We'll do the following:
+
+Set up Fuji network on Core (optional)
+Generate a 24 word english mnemonic via AvalancheJS
+Derive external C-Chain addresses via AvalancheJS
+Get AVAX from the Fuji faucet
+Send AVAX via ethersJS
+Examine the resulting transaction on the Avalanche Explorer
+Use a private key derived from a mnemonic to sign into the Core extension (wallet)
+Set up Fuji Network on Core (optional)
+To access the Fuji test network, Testnet Mode needs to be enabled. In order to do that, go to Settings and click on Advanced.
+
+Settings image 1
+
+Here, turn on the Testnet Mode feature. This will automatically make Core switch to Fuji Testnet.
+
+Settings image 2
+
+Note
+
+If you are using other wallets, like MetaMask, you can add the Fuji Testnet using the following details:
+
+Network Name: Avalanche C-Chain
+New RPC URL: https://api.avax-test.network/ext/bc/C/rpc
+ChainID: 43113
+Symbol: AVAX
+Explorer: https://testnet.snowtrace.io
+Generate a Mnemonic
+To begin, we'll create a mnemonic phrase with AvalancheJS. Mnemonics enable us to encode strong security into a human-readable phrase. AvalancheJS supports 10 languages including English, Japanese, Spanish, Italian, French, Korean, Czech, Portuguese, Chinese Simplified and Chinese Traditional.
+
+First, generate a 24 word english BIP39-compliant mnemonic via AvalancheJS.
+
+
+import { Mnemonic } from "avalanche";
+const mnemonic: Mnemonic = Mnemonic.getInstance();
+const strength: number = 256;
+const wordlist = mnemonic.getWordlists("english") as string[];
+const m: string = mnemonic.generateMnemonic(strength, randomBytes, wordlist);
+console.log(m);
+// "chimney asset heavy ecology accuse window gold weekend annual oil emerge alley retreat rabbit seed advance define off amused board quick wealth peasant disorder"
+Derive Addresses
+After generating a mnemonic we can use AvalancheJS to derive BIP32-compliant hierarchical deterministic (HD) Keypairs.
+
+
+import HDNode from "avalanche/dist/utils/hdnode";
+import { Avalanche, Mnemonic, Buffer } from "avalanche";
+import { EVMAPI, KeyChain } from "avalanche/dist/apis/evm";
+import { ethers } from "ethers";
+ 
+const ip: string = "api.avax-test.network";
+const port: number = 443;
+const protocol: string = "https";
+const networkID: number = 5;
+const avalanche: Avalanche = new Avalanche(ip, port, protocol, networkID);
+const cchain: EVMAPI = avalanche.CChain();
+ 
+const mnemonic: Mnemonic = Mnemonic.getInstance();
+const m: string = "chimney asset heavy ecology accuse window gold weekend annual oil emerge alley retreat rabbit seed advance define off amused board quick wealth peasant disorder";
+const seed: Buffer = mnemonic.mnemonicToSeedSync(m);
+const hdnode: HDNode = new HDNode(seed);
+ 
+const keyChain: KeyChain = cchain.newKeyChain();
+ 
+const cAddresses: string[] = [];
+ 
+for (let i: number = 0; i <= 2; i++) {
+  const child: HDNode = hdnode.derive(`m/44'/60'/0'/0/${i}`);
+  keyChain.importKey(child.privateKey);
+  const cchainAddress = ethers.utils.computeAddress(child.privateKey);
+  cAddresses.push(cchainAddress);
+}
+console.log(cAddresses);
+// [
+//   '0x2d1d87fF3Ea2ba6E0576bCA4310fC057972F2559',
+//   '0x25d83F090D842c1b4645c1EFA46B15093d4CaC7C',
+//   '0xa14dFb7d8593c44a47A07298eCEA774557036ff3'
+// ]
+Generate Private Keys from a Mnemonic
+As long as you have the mnemonic phrase, you can re-generate your private keys and the addresses they control.
+
+For example, if you want to generate the private keys for the first 3 address in the C Chain keychain:
+
+0x2d1d87fF3Ea2ba6E0576bCA4310fC057972F2559
+0x25d83F090D842c1b4645c1EFA46B15093d4CaC7C
+0xa14dFb7d8593c44a47A07298eCEA774557036ff3
+you might update the example script above to the following:
+
+
+const cAddresses: string[] = [];
+const privateKeys: string[] = [];
+for (let i: number = 0; i <= 2; i++) {
+  // Deriving the _i_th external BIP44 C-Chain address
+  const child: HDNode = hdnode.derive(`m/44'/60'/0'/0/${i}`);
+  keyChain.importKey(child.privateKey);
+  // Converting the BIP44 addresses to hexadecimal addresses
+  const cchainAddress = ethers.utils.computeAddress(child.privateKey);
+  privateKeys.push(child.privateKey.toString("hex"));
+  cAddresses.push(cchainAddress);
+}
+console.log({ cAddresses, privateKeys });
+// {
+//   cAddresses: [
+//     '0x2d1d87fF3Ea2ba6E0576bCA4310fC057972F2559',
+//     '0x25d83F090D842c1b4645c1EFA46B15093d4CaC7C',
+//     '0xa14dFb7d8593c44a47A07298eCEA774557036ff3'
+//   ],
+//   privateKeys: [
+//     'cd30aef1af167238c627593537e162ecf5aad1d4ab4ea98ed2f96ad4e47006dc',
+//     'b85479b26bc8fbada4737e90ab2133204f2fa2a9ea33c1e0de4452cbf8fa3be4',
+//     'c72e18ea0f9aa5457396e3bf810e9de8df0177c8e4e5bf83a85f871512d645a9'
+//   ]
+// }
+Get a Drip from the Fuji Faucet
+We can get a "drip" of AVAX from the Fuji faucet. If you already have an AVAX balance greater than zero on Mainnet, paste your C-Chain address there, and request test tokens. Otherwise, please request a faucet coupon on Guild.
+
+Admins and mods on the official Discord can provide testnet AVAX if developers are unable to obtain it from the other two options. These AVAX are for the Fuji Testnet and have no monetary value.
+
+Requesting AVAX
+
+The faucet will send some AVAX to the address and return a transaction ID (txID). This txID can be used with the Fuji Testnet Explorer to learn more about the transaction.
+
+Receiving AVAX
+
+Check the Transaction Details
+The txID, 0x1419b04559bf140ab82216f7696110936fb7d4bc1f147e3b85fef7ca1008a19e, can be seen on the Fuji Testnet Explorer. Avalanche also has a Mainnet Explorer.
+
+Transaction details
+
+Get the Balance
+We can also use the Fuji Explorer to get the balance for the 1st address—0x2d1d87fF3Ea2ba6E0576bCA4310fC057972F2559.
+
+1st derived address balance
+
+Alternatively, we can use ethersJS to get the balance.
+
+
+const ethers = require("ethers");
+const network = "https://api.avax-test.network/ext/bc/C/rpc";
+const provider = ethers.getDefaultProvider(network);
+const address = "0x2d1d87fF3Ea2ba6E0576bCA4310fC057972F2559";
+ 
+const main = async (): Promise<any> => {
+  provider.getBalance(address).then((balance) => {
+    // convert a currency unit from wei to ether
+    const balanceInAvax = ethers.utils.formatEther(balance);
+    console.log(`balance: ${balanceInAvax} AVAX`);
+    // balance: 2 AVAX
+  });
+};
+ 
+main();
+Sending AVAX
+The faucet sent 2 AVAX to the first address we generated. Let's send AVAX from the 1st address to the 2nd address.
+
+
+// import ethers.js
+import { ethers } from "ethers";
+// network: using the Fuji testnet
+const network = "https://api.avax-test.network/ext/bc/C/rpc";
+// provider: establish and RPC connection to the network
+const provider = new ethers.providers.JsonRpcProvider(network);
+ 
+// Sender private key:
+// corresponding address 0x0x2d1d87fF3Ea2ba6E0576bCA4310fC057972F2559
+let privateKey =
+  "cd30aef1af167238c627593537e162ecf5aad1d4ab4ea98ed2f96ad4e47006dc";
+// Create a wallet instance
+let wallet = new ethers.Wallet(privateKey, provider);
+// Receiver Address
+let receiverAddress = "0x25d83F090D842c1b4645c1EFA46B15093d4CaC7C";
+// AVAX amount to send
+let amountInAvax = "0.01";
+// Create a transaction object
+let tx = {
+  to: receiverAddress,
+  // Convert currency unit from ether to wei
+  value: ethers.utils.parseEther(amountInAvax),
+};
+// Send a transaction
+wallet.sendTransaction(tx).then((txObj) => {
+  console.log(`"tx, https://testnet.snowtrace.io/tx/${txObj.hash}`);
+  // A transaction result can be checked in a snowtrace with a transaction link which can be obtained here.
+});
+Verify Success
+We can verify that the transaction, 0x3a5f4198b3be8d24b272f8255912aae4dcf2fb1f97f70d1787434de7b3097aac, was successful using the Fuji Testnet Explorer. The transaction can be seen here.
+
+Transaction details
+
+Get the Balance
+We can also use the Fuji Explorer to get the balance for the 2nd address—0x25d83F090D842c1b4645c1EFA46B15093d4CaC7C.
+
+Alternatively, we can use ethersJS to get the balance.
+
+
+const ethers = require("ethers");
+const network = "https://api.avax-test.network/ext/bc/C/rpc";
+const provider = ethers.getDefaultProvider(network);
+const address = "0x25d83F090D842c1b4645c1EFA46B15093d4CaC7C";
+ 
+const main = async (): Promise<any> => {
+  provider.getBalance(address).then((balance) => {
+    // convert a currency unit from wei to ether
+    const balanceInAvax = ethers.utils.formatEther(balance);
+    console.log(`balance: ${balanceInAvax} AVAX`);
+    // balance: 0.02 AVAX
+  });
+};
+ 
+main();
+Sign in to Core Extension
+Lastly, we can use the mnemonic to generate a private key to access that account in Core extension. We'll see that it has the AVAX balance and that it derives the hexadecimal address from the private key.
+
+Use the private key to access the account in Core Extension.
+
+Access the wallet
+
+The balance is correct and the address is the 1st derived address.
+
+Core extension balance3rd derived BIP44 address
+
+We can repeat this login process using the private keys from the remaining 2 addresses in the script above.
+
+Wallet derived addressesWallet derived addresses2
+Wallet derived addresses3
+
+Summary
+The Fuji Testnet plays a critical role in testing dapps, smart contracts and financial products before deploying to the Mainnet. Tooling like AvalancheJS, the public API, faucet, and explorer helps to ensure that your testing and QA environment is close to Mainnet so that you can be confident when you launch on Mainnet.
+
+Resources
+For additional and valuable resources please see below.
+
+Faucet
+The Fuji Faucet sends AVAX to X-Chain or C-Chain addresses to help you test. (This testnet AVAX has no value.)
+
+Wallet
+Core extension and Core mobile are simple, secure, non-custodial wallets for storing Avalanche assets. They support Mainnet, Fuji and custom networks.
+
+Explorer
+The Avalanche Explorer allows you to explore the network on Mainnet and Fuji.
+
+RPC Endpoints - Public API Server
+See here.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Manually Adjust Gas Price
+
+Next
+
+Ethereum dApp → Avalanche
+
+On this page
+Introduction
+Set up Fuji Network on Core (optional)
+Generate a Mnemonic
+Derive Addresses
+Generate Private Keys from a Mnemonic
+Get a Drip from the Fuji Faucet
+Check the Transaction Details
+Get the Balance
+Sending AVAX
+Verify Success
+Get the Balance
+Sign in to Core Extension
+Summary
+Resources
+Faucet
+Wallet
+Explorer
+RPC Endpoints - Public API Server
+
+Fuji Workflow | Avalanche Builder Hub
 globs:
-alwaysApply: false
+alwaysApply: true
+
 ---

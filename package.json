@@ -1,0 +1,18 @@
+{
+  "name": "math-duel-game",
+  "version": "1.0.0",
+  "description": "1v1 Math Duel Game on Avalanche",
+  "scripts": {
+    "install:all": "npm install && cd contracts && npm install && cd ../server && npm install && cd ../frontend && npm install",
+    "dev:contracts": "cd contracts && npm run compile",
+    "dev:server": "cd server && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:frontend\"",
+    "deploy": "cd contracts && npm run deploy",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

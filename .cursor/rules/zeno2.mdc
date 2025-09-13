@@ -1,5 +1,2918 @@
 ---
-description:
+description:Introduction
+Getting Started
+Custom Chain Setup
+Token Configuration
+Asset Requirements
+Components
+Control Components
+Identity Components
+Token Components
+Input Components
+Collectibles Components
+Transaction Components
+Chain Components
+Hooks
+Precompiles Hooks
+Chain Hooks
+Glacier Hooks
+Token Hooks
+Uniswap Hooks
+ICTT Hooks
+Flows
+ICTT Flow
+Faucet Flow
+Contribute
+Contribute
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Introduction
+A comprehensive React component library for building Web3 applications on Avalanche.
+
+BuilderKit is a powerful collection of React components and hooks designed specifically for building Web3 applications on Avalanche. It provides everything you need to create modern, user-friendly blockchain applications with minimal effort.
+
+Ready to Use Components
+BuilderKit offers a comprehensive set of components that handle common Web3 functionalities:
+
+Control Components: Buttons, forms, and wallet connection interfaces
+Identity Components: Address displays and domain name resolution
+Token Components: Balance displays, inputs, and price conversions
+Input Components: Specialized form inputs for Web3 data types
+Chain Components: Network selection and chain information displays
+Transaction Components: Transaction submission and status tracking
+Collectibles Components: NFT displays and collection management
+Powerful Hooks
+BuilderKit provides hooks for seamless integration with Avalanche's ecosystem:
+
+Blockchain Interaction
+Access and manage blockchain data, tokens, and cross-chain operations with hooks for chains, tokens, DEX interactions, and inter-chain transfers.
+
+Precompile Integration
+Easily integrate with Avalanche's precompiled contracts for access control, fee management, native minting, rewards, and cross-chain messaging.
+
+Getting Started
+Get started quickly by installing BuilderKit in your React application:
+
+
+npm install @avalabs/builderkit
+# or
+yarn add @avalabs/builderkit
+Check out our Getting Started guide to begin building your Web3 application.
+
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Next
+
+Getting Started
+
+On this page
+Ready to Use Components
+Powerful Hooks
+Blockchain Interaction
+Precompile Integration
+Getting Started
+
+Introduction | Avalanche Builder Hub
+
+
+
+Introduction
+Getting Started
+Custom Chain Setup
+Token Configuration
+Asset Requirements
+Components
+Control Components
+Identity Components
+Token Components
+Input Components
+Collectibles Components
+Transaction Components
+Chain Components
+Hooks
+Precompiles Hooks
+Chain Hooks
+Glacier Hooks
+Token Hooks
+Uniswap Hooks
+ICTT Hooks
+Flows
+ICTT Flow
+Faucet Flow
+Contribute
+Contribute
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Getting Started
+Quick setup guide for BuilderKit in your React application.
+
+Get started with BuilderKit in your React application.
+
+Installation
+
+npm install @avalabs/builderkit
+# or
+yarn add @avalabs/builderkit
+Provider Setup
+Wrap your application with the Web3Provider to enable wallet connections and chain management:
+
+
+import { Web3Provider } from '@avalabs/builderkit';
+import { avalanche, avalancheFuji } from '@wagmi/core/chains';
+import { echo } from './chains/definitions/echo';
+import { dispatch } from './chains/definitions/dispatch';
+ 
+// Configure chains
+const chains = [avalanche, avalancheFuji, echo, dispatch];
+ 
+function App() {
+  return (
+    <Web3Provider
+      appName="My DApp"
+      projectId="YOUR_PROJECT_ID"
+      chains={chains}
+    >
+      <YourApp />
+    </Web3Provider>
+  );
+}
+Next Steps
+Learn about Token Configuration
+Explore Core Components
+Check out Pre-built Flows
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Introduction
+
+Next
+
+Custom Chain Setup
+
+On this page
+Installation
+Provider Setup
+Next Steps
+
+Getting Started | Avalanche Builder Hub
+
+
+Introduction
+Getting Started
+Custom Chain Setup
+Token Configuration
+Asset Requirements
+Components
+Control Components
+Identity Components
+Token Components
+Input Components
+Collectibles Components
+Transaction Components
+Chain Components
+Hooks
+Precompiles Hooks
+Chain Hooks
+Glacier Hooks
+Token Hooks
+Uniswap Hooks
+ICTT Hooks
+Flows
+ICTT Flow
+Faucet Flow
+Contribute
+Contribute
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Custom Chain Setup
+Configure custom Avalanche L1 chains in your application.
+
+Custom Chain Setup
+Learn how to configure custom Avalanche L1 chains in your BuilderKit application.
+
+Chain Definition
+Define your custom L1 chain using viem's defineChain:
+
+
+import { defineChain } from "viem";
+ 
+export const myL1 = defineChain({
+    id: 173750,  // Your L1 chain ID
+    name: 'My L1',  // Display name
+    network: 'my-l1',  // Network identifier
+    nativeCurrency: {
+        decimals: 18,
+        name: 'Token',
+        symbol: 'TKN',
+    },
+    rpcUrls: {
+        default: {
+            http: ['https://api.avax.network/ext/L1/rpc']
+        },
+    },
+    blockExplorers: {
+        default: { 
+            name: 'Explorer', 
+            url: 'https://explorer.avax.network/my-l1' 
+        },
+    },
+    // Optional: Custom metadata
+    iconUrl: "/chains/logo/my-l1.png",
+    icm_registry: "0x..."  // ICM registry contract
+});
+Provider Configuration
+Add your custom L1 chain to the Web3Provider:
+
+
+import { Web3Provider } from '@avalabs/builderkit';
+import { avalanche } from '@wagmi/core/chains';
+import { myL1 } from './chains/definitions/my-l1';
+ 
+function App() {
+  return (
+    <Web3Provider
+      chains={[avalanche, myL1]}
+      defaultChain={avalanche}
+    >
+      <YourApp />
+    </Web3Provider>
+  );
+}
+Required Properties
+Property	Type	Description
+id	number	Unique L1 chain identifier
+name	string	Human-readable chain name
+network	string	Network identifier
+nativeCurrency	object	Chain's native token details
+rpcUrls	object	RPC endpoint configuration
+blockExplorers	object	Block explorer URLs
+Optional Properties
+Property	Type	Description
+iconUrl	string	Chain logo URL
+icm_registry	string	ICM registry contract address
+testnet	boolean	Whether the chain is a testnet
+Example: Echo L1
+Here's a complete example using the Echo L1:
+
+
+import { defineChain } from "viem";
+ 
+export const echo = defineChain({
+    id: 173750,
+    name: 'Echo L1',
+    network: 'echo',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'Ech',
+        symbol: 'ECH',
+    },
+    rpcUrls: {
+        default: {
+            http: ['https://subnets.avax.network/echo/testnet/rpc']
+        },
+    },
+    blockExplorers: {
+        default: { 
+            name: 'Explorer', 
+            url: 'https://subnets-test.avax.network/echo' 
+        },
+    },
+    iconUrl: "/chains/logo/173750.png",
+    icm_registry: "0xF86Cb19Ad8405AEFa7d09C778215D2Cb6eBfB228"
+});
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Getting Started
+
+Next
+
+Token Configuration
+
+On this page
+Custom Chain Setup
+Chain Definition
+Provider Configuration
+Required Properties
+Optional Properties
+Example: Echo L1
+
+Custom Chain Setup | Avalanche Builder Hub
+
+
+
+Introduction
+Getting Started
+Custom Chain Setup
+Token Configuration
+Asset Requirements
+Components
+Control Components
+Identity Components
+Token Components
+Input Components
+Collectibles Components
+Transaction Components
+Chain Components
+Hooks
+Precompiles Hooks
+Chain Hooks
+Glacier Hooks
+Token Hooks
+Uniswap Hooks
+ICTT Hooks
+Flows
+ICTT Flow
+Faucet Flow
+Contribute
+Contribute
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Token Configuration
+Guide for configuring tokens in BuilderKit flows.
+
+Token Configuration
+BuilderKit flows require proper token configuration to function correctly. This guide explains the required fields for different token configurations.
+
+Basic Token Structure
+All tokens in BuilderKit share a common base structure with these required fields:
+
+
+interface BaseToken {
+  // Contract address of the token, use "native" for native chain token
+  address: string;      
+  
+  // Human-readable name of the token
+  name: string;         
+  
+  // Token symbol/ticker
+  symbol: string;       
+  
+  // Number of decimal places the token uses
+  decimals: number;     
+  
+  // ID of the chain where this token exists
+  chain_id: number;     
+}
+ICTT Token Fields
+ICTT tokens extend the base structure with additional fields for cross-chain functionality:
+
+
+interface ICTTToken extends BaseToken {
+  // Whether this token can be used with ICTT
+  supports_ictt: boolean;  
+  
+  // Address of the contract that handles transfers
+  transferer?: string;     
+  
+  // Whether this token instance is a transferer
+  is_transferer?: boolean; 
+  
+  // Information about corresponding tokens on other chains
+  mirrors: {
+    // Contract address of the mirrored token
+    address: string;       
+    
+    // Transferer contract on the mirror chain
+    transferer: string;    
+    
+    // Chain ID where the mirror exists
+    chain_id: number;      
+    
+    // Decimal places of the mirrored token
+    decimals: number;      
+    
+    // Whether this is the home/original chain
+    home?: boolean;        
+  }[];
+}
+Field Requirements
+Base Token Fields
+address: Must be a valid contract address or "native"
+name: Should be human-readable
+symbol: Should match the token's trading symbol
+decimals: Must match the token's contract configuration
+chain_id: Must be a valid chain ID
+ICTT-Specific Fields
+supports_ictt: Required for ICTT functionality
+transferer: Required if token supports ICTT
+is_transferer: Optional, indicates if token is a transferer
+mirrors: Required for ICTT, must contain at least one mirror configuration
+Mirror Configuration Fields
+address: Required, contract address on mirror chain
+transferer: Required, transferer contract on mirror chain
+chain_id: Required, must be different from token's chain_id
+decimals: Required, must match token contract
+home: Optional, indicates original/home chain
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Custom Chain Setup
+
+Next
+
+Asset Requirements
+
+On this page
+Token Configuration
+Basic Token Structure
+ICTT Token Fields
+Field Requirements
+Base Token Fields
+ICTT-Specific Fields
+Mirror Configuration Fields
+
+Token Configuration | Avalanche Builder Hub
+
+
+Introduction
+Getting Started
+Custom Chain Setup
+Token Configuration
+Asset Requirements
+Components
+Control Components
+Identity Components
+Token Components
+Input Components
+Collectibles Components
+Transaction Components
+Chain Components
+Hooks
+Precompiles Hooks
+Chain Hooks
+Glacier Hooks
+Token Hooks
+Uniswap Hooks
+ICTT Hooks
+Flows
+ICTT Flow
+Faucet Flow
+Contribute
+Contribute
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Asset Requirements
+Required assets and file structure for chain and token logos.
+
+Asset Requirements
+BuilderKit requires specific asset files for displaying chain and token logos. These assets should follow a standardized file structure and naming convention.
+
+Chain Logos
+Chain logos are used by components like ChainIcon, ChainDropdown, and TokenIconWithChain.
+
+File Structure
+Chain logos should be placed at:
+
+
+/chains/logo/{chain_id}.png
+Examples
+
+/chains/logo/43114.png  // Avalanche C-Chain
+/chains/logo/43113.png  // Fuji Testnet
+/chains/logo/173750.png // Echo L1
+Requirements
+Format: PNG with transparency
+Dimensions: 32x32px (minimum)
+Background: Transparent
+Shape: Circular or square with rounded corners
+File size: < 100KB
+Token Logos
+Token logos are used by components like TokenIcon, TokenChip, and TokenRow.
+
+File Structure
+Token logos should be placed at:
+
+
+/tokens/logo/{chain_id}/{address}.png
+Examples
+
+/tokens/logo/43114/0x1234567890123456789012345678901234567890.png  // Token on C-Chain
+/tokens/logo/43113/0x5678901234567890123456789012345678901234.png  // Token on Fuji
+Requirements
+Format: PNG with transparency
+Dimensions: 32x32px (minimum)
+Background: Transparent
+Shape: Circular or square with rounded corners
+File size: < 100KB
+Directory Structure
+Your public assets directory should look like this:
+
+
+public/
+├── chains/
+│   └── logo/
+│       ├── 43114.png
+│       ├── 43113.png
+│       └── 173750.png
+└── tokens/
+    └── logo/
+        ├── 43114/
+        │   ├── 0x1234....png
+        │   └── 0x5678....png
+        └── 43113/
+            ├── 0x9012....png
+            └── 0xabcd....png
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Token Configuration
+
+Next
+
+Control Components
+
+On this page
+Asset Requirements
+Chain Logos
+File Structure
+Examples
+Requirements
+Token Logos
+File Structure
+Examples
+Requirements
+Directory Structure
+
+Asset Requirements | Avalanche Builder Hub
+
+
+Introduction
+Getting Started
+Custom Chain Setup
+Token Configuration
+Asset Requirements
+Components
+Control Components
+Button
+ConnectButton
+Identity Components
+Token Components
+Input Components
+Collectibles Components
+Transaction Components
+Chain Components
+Hooks
+Precompiles Hooks
+Chain Hooks
+Glacier Hooks
+Token Hooks
+Uniswap Hooks
+ICTT Hooks
+Flows
+ICTT Flow
+Faucet Flow
+Contribute
+Contribute
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Control Components
+Button
+A versatile button component that supports multiple states and actions.
+
+Button
+The Button component is a versatile control that supports multiple states and actions.
+
+Usage
+
+import { Button } from '@avalabs/builderkit';
+ 
+// Basic usage
+<Button 
+  label="Click me"
+  action={() => console.log('Button clicked')}
+/>
+ 
+// With loading state
+<Button 
+  label="Processing..."
+  action={() => {}}
+  status="loading"
+/>
+ 
+// Disabled state
+<Button 
+  label="Unavailable"
+  action={() => {}}
+  status="disabled"
+/>
+Props
+Prop	Type	Default	Description
+label	string	-	Text to display on the button
+action	() => void	-	Function to execute when button is clicked
+status	'idle' | 'loading' | 'disabled'	'idle'	Current state of the button
+className	string	-	Additional CSS classes
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Control Components
+
+Next
+
+ConnectButton
+
+On this page
+Button
+Usage
+Props
+
+Button | Avalanche Builder Hub
+
+
+
+Introduction
+Getting Started
+Custom Chain Setup
+Token Configuration
+Asset Requirements
+Components
+Control Components
+Button
+ConnectButton
+Identity Components
+Token Components
+Input Components
+Collectibles Components
+Transaction Components
+Chain Components
+Hooks
+Precompiles Hooks
+Chain Hooks
+Glacier Hooks
+Token Hooks
+Uniswap Hooks
+ICTT Hooks
+Flows
+ICTT Flow
+Faucet Flow
+Contribute
+Contribute
+Documentation
+Search
+⌘
+K
+Academy
+Console
+Integrations
+
+
+
+
+Quick Start
+Build Apps
+Avalanche L1s
+Interoperability
+Custom VMs
+Nodes & Validators
+Toolings
+API References
+Builder Kit
+Control Components
+ConnectButton
+A button component that handles wallet connection functionality.
+
+ConnectButton
+The ConnectButton component provides wallet connection functionality with built-in state management.
+
+Usage
+
+import { ConnectButton } from '@avalabs/builderkit';
+ 
+// Basic usage
+<ConnectButton />
+ 
+// With wallet display
+<ConnectButton 
+  showConnectedWallet={true}
+  checkWrongNetwork={true}
+/>
+Props
+Prop	Type	Default	Description
+showConnectedWallet	boolean	false	Show connected wallet address
+checkWrongNetwork	boolean	false	Enable network validation
+className	string	-	Additional CSS classes
+Is this guide helpful?
+
+Yes
+No
+Copy Markdown
+Open
+Report Issue
+Previous
+
+Button
+
+Next
+
+Identity Components
+
+On this page
+ConnectButton
+Usage
+Props
+
+ConnectButton | Avalanche Builder Hub
+
+# Address
+URL: /docs/builderkit/components/identity/address
+
+A component for displaying Ethereum addresses with optional abbreviation.
+
+# Address
+
+The Address component displays Ethereum addresses with optional abbreviation and validation.
+
+## Usage
+
+```tsx
+import { Address } from '@avalabs/builderkit';
+
+// Basic usage
+<Address address="0x1234567890123456789012345678901234567890" />
+
+// With abbreviation
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+
+// Using context (inside Identity provider)
+<Address abbreviate={true} />
+```
+
+## Props
+
+| Prop         | Type      | Default | Description                                                                |
+| ------------ | --------- | ------- | -------------------------------------------------------------------------- |
+| `address`    | `string`  | -       | The Ethereum address to display (optional if used within Identity context) |
+| `abbreviate` | `boolean` | `false` | Whether to show abbreviated address (e.g., 0x1234...5678)                  |
+
+## Features
+
+* Validates input address using `ethers.isAddress`
+* Supports address abbreviation (0x1234...5678)
+* Can use address from Identity context if not provided directly
+* Throws error for invalid addresses
+
+## Examples
+
+### Basic Display
+
+```tsx
+<Address address="0x1234567890123456789012345678901234567890" />
+// Output: 0x1234567890123456789012345678901234567890
+```
+
+### Abbreviated Display
+
+```tsx
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+// Output: 0x1234...5678
+```
+
+### With Identity Context
+
+```tsx
+<Identity address="0x1234567890123456789012345678901234567890">
+  <Address abbreviate={true} />
+</Identity>
+```
+
+## Error Handling
+
+The component will throw an error if:
+
+* No address is provided (either via props or context)
+* The provided address is not a valid Ethereum address
+# Address
+URL: /docs/builderkit/components/identity/address
+
+A component for displaying Ethereum addresses with optional abbreviation.
+
+# Address
+
+The Address component displays Ethereum addresses with optional abbreviation and validation.
+
+## Usage
+
+```tsx
+import { Address } from '@avalabs/builderkit';
+
+// Basic usage
+<Address address="0x1234567890123456789012345678901234567890" />
+
+// With abbreviation
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+
+// Using context (inside Identity provider)
+<Address abbreviate={true} />
+```
+
+## Props
+
+| Prop         | Type      | Default | Description                                                                |
+| ------------ | --------- | ------- | -------------------------------------------------------------------------- |
+| `address`    | `string`  | -       | The Ethereum address to display (optional if used within Identity context) |
+| `abbreviate` | `boolean` | `false` | Whether to show abbreviated address (e.g., 0x1234...5678)                  |
+
+## Features
+
+* Validates input address using `ethers.isAddress`
+* Supports address abbreviation (0x1234...5678)
+* Can use address from Identity context if not provided directly
+* Throws error for invalid addresses
+
+## Examples
+
+### Basic Display
+
+```tsx
+<Address address="0x1234567890123456789012345678901234567890" />
+// Output: 0x1234567890123456789012345678901234567890
+```
+
+### Abbreviated Display
+
+```tsx
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+// Output: 0x1234...5678
+```
+
+### With Identity Context
+
+```tsx
+<Identity address="0x1234567890123456789012345678901234567890">
+  <Address abbreviate={true} />
+</Identity>
+```
+
+## Error Handling
+
+The component will throw an error if:
+
+* No address is provided (either via props or context)
+* The provided address is not a valid Ethereum address
+
+
+
+# Address
+URL: /docs/builderkit/components/identity/address
+
+A component for displaying Ethereum addresses with optional abbreviation.
+
+# Address
+
+The Address component displays Ethereum addresses with optional abbreviation and validation.
+
+## Usage
+
+```tsx
+import { Address } from '@avalabs/builderkit';
+
+// Basic usage
+<Address address="0x1234567890123456789012345678901234567890" />
+
+// With abbreviation
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+
+// Using context (inside Identity provider)
+<Address abbreviate={true} />
+```
+
+## Props
+
+| Prop         | Type      | Default | Description                                                                |
+| ------------ | --------- | ------- | -------------------------------------------------------------------------- |
+| `address`    | `string`  | -       | The Ethereum address to display (optional if used within Identity context) |
+| `abbreviate` | `boolean` | `false` | Whether to show abbreviated address (e.g., 0x1234...5678)                  |
+
+## Features
+
+* Validates input address using `ethers.isAddress`
+* Supports address abbreviation (0x1234...5678)
+* Can use address from Identity context if not provided directly
+* Throws error for invalid addresses
+
+## Examples
+
+### Basic Display
+
+```tsx
+<Address address="0x1234567890123456789012345678901234567890" />
+// Output: 0x1234567890123456789012345678901234567890
+```
+
+### Abbreviated Display
+
+```tsx
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+// Output: 0x1234...5678
+```
+
+### With Identity Context
+
+```tsx
+<Identity address="0x1234567890123456789012345678901234567890">
+  <Address abbreviate={true} />
+</Identity>
+```
+
+## Error Handling
+
+The component will throw an error if:
+
+* No address is provided (either via props or context)
+* The provided address is not a valid Ethereum address
+
+
+# Address
+URL: /docs/builderkit/components/identity/address
+
+A component for displaying Ethereum addresses with optional abbreviation.
+
+# Address
+
+The Address component displays Ethereum addresses with optional abbreviation and validation.
+
+## Usage
+
+```tsx
+import { Address } from '@avalabs/builderkit';
+
+// Basic usage
+<Address address="0x1234567890123456789012345678901234567890" />
+
+// With abbreviation
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+
+// Using context (inside Identity provider)
+<Address abbreviate={true} />
+```
+
+## Props
+
+| Prop         | Type      | Default | Description                                                                |
+| ------------ | --------- | ------- | -------------------------------------------------------------------------- |
+| `address`    | `string`  | -       | The Ethereum address to display (optional if used within Identity context) |
+| `abbreviate` | `boolean` | `false` | Whether to show abbreviated address (e.g., 0x1234...5678)                  |
+
+## Features
+
+* Validates input address using `ethers.isAddress`
+* Supports address abbreviation (0x1234...5678)
+* Can use address from Identity context if not provided directly
+* Throws error for invalid addresses
+
+## Examples
+
+### Basic Display
+
+```tsx
+<Address address="0x1234567890123456789012345678901234567890" />
+// Output: 0x1234567890123456789012345678901234567890
+```
+
+### Abbreviated Display
+
+```tsx
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+// Output: 0x1234...5678
+```
+
+### With Identity Context
+
+```tsx
+<Identity address="0x1234567890123456789012345678901234567890">
+  <Address abbreviate={true} />
+</Identity>
+```
+
+## Error Handling
+
+The component will throw an error if:
+
+* No address is provided (either via props or context)
+* The provided address is not a valid Ethereum address
+
+
+
+# Address
+URL: /docs/builderkit/components/identity/address
+
+A component for displaying Ethereum addresses with optional abbreviation.
+
+# Address
+
+The Address component displays Ethereum addresses with optional abbreviation and validation.
+
+## Usage
+
+```tsx
+import { Address } from '@avalabs/builderkit';
+
+// Basic usage
+<Address address="0x1234567890123456789012345678901234567890" />
+
+// With abbreviation
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+
+// Using context (inside Identity provider)
+<Address abbreviate={true} />
+```
+
+## Props
+
+| Prop         | Type      | Default | Description                                                                |
+| ------------ | --------- | ------- | -------------------------------------------------------------------------- |
+| `address`    | `string`  | -       | The Ethereum address to display (optional if used within Identity context) |
+| `abbreviate` | `boolean` | `false` | Whether to show abbreviated address (e.g., 0x1234...5678)                  |
+
+## Features
+
+* Validates input address using `ethers.isAddress`
+* Supports address abbreviation (0x1234...5678)
+* Can use address from Identity context if not provided directly
+* Throws error for invalid addresses
+
+## Examples
+
+### Basic Display
+
+```tsx
+<Address address="0x1234567890123456789012345678901234567890" />
+// Output: 0x1234567890123456789012345678901234567890
+```
+
+### Abbreviated Display
+
+```tsx
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+// Output: 0x1234...5678
+```
+
+### With Identity Context
+
+```tsx
+<Identity address="0x1234567890123456789012345678901234567890">
+  <Address abbreviate={true} />
+</Identity>
+```
+
+## Error Handling
+
+The component will throw an error if:
+
+* No address is provided (either via props or context)
+* The provided address is not a valid Ethereum address
+
+
+
+# Address
+URL: /docs/builderkit/components/identity/address
+
+A component for displaying Ethereum addresses with optional abbreviation.
+
+# Address
+
+The Address component displays Ethereum addresses with optional abbreviation and validation.
+
+## Usage
+
+```tsx
+import { Address } from '@avalabs/builderkit';
+
+// Basic usage
+<Address address="0x1234567890123456789012345678901234567890" />
+
+// With abbreviation
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+
+// Using context (inside Identity provider)
+<Address abbreviate={true} />
+```
+
+## Props
+
+| Prop         | Type      | Default | Description                                                                |
+| ------------ | --------- | ------- | -------------------------------------------------------------------------- |
+| `address`    | `string`  | -       | The Ethereum address to display (optional if used within Identity context) |
+| `abbreviate` | `boolean` | `false` | Whether to show abbreviated address (e.g., 0x1234...5678)                  |
+
+## Features
+
+* Validates input address using `ethers.isAddress`
+* Supports address abbreviation (0x1234...5678)
+* Can use address from Identity context if not provided directly
+* Throws error for invalid addresses
+
+## Examples
+
+### Basic Display
+
+```tsx
+<Address address="0x1234567890123456789012345678901234567890" />
+// Output: 0x1234567890123456789012345678901234567890
+```
+
+### Abbreviated Display
+
+```tsx
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+// Output: 0x1234...5678
+```
+
+### With Identity Context
+
+```tsx
+<Identity address="0x1234567890123456789012345678901234567890">
+  <Address abbreviate={true} />
+</Identity>
+```
+
+## Error Handling
+
+The component will throw an error if:
+
+* No address is provided (either via props or context)
+* The provided address is not a valid Ethereum address
+
+
+
+
+# Address
+URL: /docs/builderkit/components/identity/address
+
+A component for displaying Ethereum addresses with optional abbreviation.
+
+# Address
+
+The Address component displays Ethereum addresses with optional abbreviation and validation.
+
+## Usage
+
+```tsx
+import { Address } from '@avalabs/builderkit';
+
+// Basic usage
+<Address address="0x1234567890123456789012345678901234567890" />
+
+// With abbreviation
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+
+// Using context (inside Identity provider)
+<Address abbreviate={true} />
+```
+
+## Props
+
+| Prop         | Type      | Default | Description                                                                |
+| ------------ | --------- | ------- | -------------------------------------------------------------------------- |
+| `address`    | `string`  | -       | The Ethereum address to display (optional if used within Identity context) |
+| `abbreviate` | `boolean` | `false` | Whether to show abbreviated address (e.g., 0x1234...5678)                  |
+
+## Features
+
+* Validates input address using `ethers.isAddress`
+* Supports address abbreviation (0x1234...5678)
+* Can use address from Identity context if not provided directly
+* Throws error for invalid addresses
+
+## Examples
+
+### Basic Display
+
+```tsx
+<Address address="0x1234567890123456789012345678901234567890" />
+// Output: 0x1234567890123456789012345678901234567890
+```
+
+### Abbreviated Display
+
+```tsx
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+// Output: 0x1234...5678
+```
+
+### With Identity Context
+
+```tsx
+<Identity address="0x1234567890123456789012345678901234567890">
+  <Address abbreviate={true} />
+</Identity>
+```
+
+## Error Handling
+
+The component will throw an error if:
+
+* No address is provided (either via props or context)
+* The provided address is not a valid Ethereum address
+
+
+
+# Address
+URL: /docs/builderkit/components/identity/address
+
+A component for displaying Ethereum addresses with optional abbreviation.
+
+# Address
+
+The Address component displays Ethereum addresses with optional abbreviation and validation.
+
+## Usage
+
+```tsx
+import { Address } from '@avalabs/builderkit';
+
+// Basic usage
+<Address address="0x1234567890123456789012345678901234567890" />
+
+// With abbreviation
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+
+// Using context (inside Identity provider)
+<Address abbreviate={true} />
+```
+
+## Props
+
+| Prop         | Type      | Default | Description                                                                |
+| ------------ | --------- | ------- | -------------------------------------------------------------------------- |
+| `address`    | `string`  | -       | The Ethereum address to display (optional if used within Identity context) |
+| `abbreviate` | `boolean` | `false` | Whether to show abbreviated address (e.g., 0x1234...5678)                  |
+
+## Features
+
+* Validates input address using `ethers.isAddress`
+* Supports address abbreviation (0x1234...5678)
+* Can use address from Identity context if not provided directly
+* Throws error for invalid addresses
+
+## Examples
+
+### Basic Display
+
+```tsx
+<Address address="0x1234567890123456789012345678901234567890" />
+// Output: 0x1234567890123456789012345678901234567890
+```
+
+### Abbreviated Display
+
+```tsx
+<Address 
+  address="0x1234567890123456789012345678901234567890"
+  abbreviate={true}
+/>
+// Output: 0x1234...5678
+```
+
+### With Identity Context
+
+```tsx
+<Identity address="0x1234567890123456789012345678901234567890">
+  <Address abbreviate={true} />
+</Identity>
+```
+
+## Error Handling
+
+The component will throw an error if:
+
+* No address is provided (either via props or context)
+* The provided address is not a valid Ethereum address
+
+
+
+# AddressInput
+URL: /docs/builderkit/components/input/address-input
+
+An input component for Ethereum addresses with built-in validation.
+
+# AddressInput
+
+The AddressInput component provides a specialized input field for Ethereum addresses with real-time validation.
+
+## Usage
+
+```tsx
+import { AddressInput } from '@avalabs/builderkit';
+import { Wallet } from 'lucide-react';
+
+// Basic usage
+<AddressInput 
+  placeholder="Enter address..."
+  onChange={(address) => console.log('Valid address:', address)}
+/>
+
+// With icon
+<AddressInput 
+  placeholder="Recipient address"
+  icon={<Wallet className="w-4 h-4" />}
+  onChange={handleAddressChange}
+/>
+```
+
+## Props
+
+| Prop          | Type                        | Default | Description                               |
+| ------------- | --------------------------- | ------- | ----------------------------------------- |
+| `placeholder` | `string`                    | -       | Placeholder text                          |
+| `value`       | `string`                    | `""`    | Controlled input value                    |
+| `disabled`    | `boolean`                   | `false` | Whether the input is disabled             |
+| `icon`        | `ReactNode`                 | -       | Optional icon element                     |
+| `onChange`    | `(address: string) => void` | -       | Called with valid address or empty string |
+| `className`   | `string`                    | -       | Additional CSS classes                    |
+
+## Features
+
+* Real-time Ethereum address validation using `viem`
+* Visual feedback for invalid addresses
+* Only emits valid addresses through onChange
+* Optional icon support
+* Controlled value management
+* Error state styling
+
+## Examples
+
+### Basic Address Input
+
+```tsx
+<AddressInput 
+  placeholder="Enter Ethereum address"
+  onChange={setRecipientAddress}
+/>
+```
+
+### With Error Handling
+
+```tsx
+<AddressInput 
+  placeholder="Recipient address"
+  onChange={(address) => {
+    if (address) {
+      handleValidAddress(address);
+    } else {
+      setError('Please enter a valid address');
+    }
+  }}
+/>
+```
+
+### With Custom Styling
+
+```tsx
+<AddressInput 
+  placeholder="Enter address"
+  icon={<Wallet />}
+  className="bg-gray-100 rounded-lg"
+  onChange={handleAddress}
+/>
+```
+
+### In a Form
+
+```tsx
+<form onSubmit={handleSubmit}>
+  <AddressInput 
+    placeholder="Recipient"
+    value={recipientAddress}
+    onChange={setRecipientAddress}
+    className="mb-4"
+  />
+  <button 
+    type="submit" 
+    disabled={!recipientAddress}
+  >
+    Send
+  </button>
+</form>
+```
+
+## Validation States
+
+1. **Initial**: No validation indicator
+2. **Valid**: No visual feedback (clean state)
+3. **Invalid**: Red ring around input
+4. **Disabled**: Grayed out appearance
+
+
+
+
+
+
+
+# AddressInput
+URL: /docs/builderkit/components/input/address-input
+
+An input component for Ethereum addresses with built-in validation.
+
+# AddressInput
+
+The AddressInput component provides a specialized input field for Ethereum addresses with real-time validation.
+
+## Usage
+
+```tsx
+import { AddressInput } from '@avalabs/builderkit';
+import { Wallet } from 'lucide-react';
+
+// Basic usage
+<AddressInput 
+  placeholder="Enter address..."
+  onChange={(address) => console.log('Valid address:', address)}
+/>
+
+// With icon
+<AddressInput 
+  placeholder="Recipient address"
+  icon={<Wallet className="w-4 h-4" />}
+  onChange={handleAddressChange}
+/>
+```
+
+## Props
+
+| Prop          | Type                        | Default | Description                               |
+| ------------- | --------------------------- | ------- | ----------------------------------------- |
+| `placeholder` | `string`                    | -       | Placeholder text                          |
+| `value`       | `string`                    | `""`    | Controlled input value                    |
+| `disabled`    | `boolean`                   | `false` | Whether the input is disabled             |
+| `icon`        | `ReactNode`                 | -       | Optional icon element                     |
+| `onChange`    | `(address: string) => void` | -       | Called with valid address or empty string |
+| `className`   | `string`                    | -       | Additional CSS classes                    |
+
+## Features
+
+* Real-time Ethereum address validation using `viem`
+* Visual feedback for invalid addresses
+* Only emits valid addresses through onChange
+* Optional icon support
+* Controlled value management
+* Error state styling
+
+## Examples
+
+### Basic Address Input
+
+```tsx
+<AddressInput 
+  placeholder="Enter Ethereum address"
+  onChange={setRecipientAddress}
+/>
+```
+
+### With Error Handling
+
+```tsx
+<AddressInput 
+  placeholder="Recipient address"
+  onChange={(address) => {
+    if (address) {
+      handleValidAddress(address);
+    } else {
+      setError('Please enter a valid address');
+    }
+  }}
+/>
+```
+
+### With Custom Styling
+
+```tsx
+<AddressInput 
+  placeholder="Enter address"
+  icon={<Wallet />}
+  className="bg-gray-100 rounded-lg"
+  onChange={handleAddress}
+/>
+```
+
+### In a Form
+
+```tsx
+<form onSubmit={handleSubmit}>
+  <AddressInput 
+    placeholder="Recipient"
+    value={recipientAddress}
+    onChange={setRecipientAddress}
+    className="mb-4"
+  />
+  <button 
+    type="submit" 
+    disabled={!recipientAddress}
+  >
+    Send
+  </button>
+</form>
+```
+
+## Validation States
+
+1. **Initial**: No validation indicator
+2. **Valid**: No visual feedback (clean state)
+3. **Invalid**: Red ring around input
+4. **Disabled**: Grayed out appearance
+
+
+
+
+# AddressInput
+URL: /docs/builderkit/components/input/address-input
+
+An input component for Ethereum addresses with built-in validation.
+
+# AddressInput
+
+The AddressInput component provides a specialized input field for Ethereum addresses with real-time validation.
+
+## Usage
+
+```tsx
+import { AddressInput } from '@avalabs/builderkit';
+import { Wallet } from 'lucide-react';
+
+// Basic usage
+<AddressInput 
+  placeholder="Enter address..."
+  onChange={(address) => console.log('Valid address:', address)}
+/>
+
+// With icon
+<AddressInput 
+  placeholder="Recipient address"
+  icon={<Wallet className="w-4 h-4" />}
+  onChange={handleAddressChange}
+/>
+```
+
+## Props
+
+| Prop          | Type                        | Default | Description                               |
+| ------------- | --------------------------- | ------- | ----------------------------------------- |
+| `placeholder` | `string`                    | -       | Placeholder text                          |
+| `value`       | `string`                    | `""`    | Controlled input value                    |
+| `disabled`    | `boolean`                   | `false` | Whether the input is disabled             |
+| `icon`        | `ReactNode`                 | -       | Optional icon element                     |
+| `onChange`    | `(address: string) => void` | -       | Called with valid address or empty string |
+| `className`   | `string`                    | -       | Additional CSS classes                    |
+
+## Features
+
+* Real-time Ethereum address validation using `viem`
+* Visual feedback for invalid addresses
+* Only emits valid addresses through onChange
+* Optional icon support
+* Controlled value management
+* Error state styling
+
+## Examples
+
+### Basic Address Input
+
+```tsx
+<AddressInput 
+  placeholder="Enter Ethereum address"
+  onChange={setRecipientAddress}
+/>
+```
+
+### With Error Handling
+
+```tsx
+<AddressInput 
+  placeholder="Recipient address"
+  onChange={(address) => {
+    if (address) {
+      handleValidAddress(address);
+    } else {
+      setError('Please enter a valid address');
+    }
+  }}
+/>
+```
+
+### With Custom Styling
+
+```tsx
+<AddressInput 
+  placeholder="Enter address"
+  icon={<Wallet />}
+  className="bg-gray-100 rounded-lg"
+  onChange={handleAddress}
+/>
+```
+
+### In a Form
+
+```tsx
+<form onSubmit={handleSubmit}>
+  <AddressInput 
+    placeholder="Recipient"
+    value={recipientAddress}
+    onChange={setRecipientAddress}
+    className="mb-4"
+  />
+  <button 
+    type="submit" 
+    disabled={!recipientAddress}
+  >
+    Send
+  </button>
+</form>
+```
+
+## Validation States
+
+1. **Initial**: No validation indicator
+2. **Valid**: No visual feedback (clean state)
+3. **Invalid**: Red ring around input
+4. **Disabled**: Grayed out appearance
+
+
+
+
+# MultiChainTokenInput
+URL: /docs/builderkit/components/input/multi-chain-token-input
+
+A token selection component that supports tokens across multiple chains.
+
+# MultiChainTokenInput
+
+The MultiChainTokenInput component provides a token selection interface that allows users to select tokens from different chains.
+
+## Usage
+
+```tsx
+import { MultiChainTokenInput } from '@avalabs/builderkit';
+
+// Basic usage
+<MultiChainTokenInput 
+  selected={{ 
+    address: "0x1234...", 
+    chain_id: 43114,
+    symbol: "AVAX" 
+  }}
+  list={multiChainTokenList}
+  onSelectionChanged={(token) => console.log('Selected token:', token)}
+  showBalances={true}
+/>
+```
+
+## Props
+
+| Prop                 | Type                                                         | Default | Description                         |
+| -------------------- | ------------------------------------------------------------ | ------- | ----------------------------------- |
+| `selected`           | `{ address: string, chain_id: number } & Partial<TokenItem>` | -       | Currently selected token with chain |
+| `list`               | `TokenItem[]`                                                | -       | Array of tokens across all chains   |
+| `onSelectionChanged` | `(token: TokenItem) => void`                                 | -       | Called when token selection changes |
+| `showBalances`       | `boolean`                                                    | -       | Whether to show token balances      |
+| `className`          | `string`                                                     | -       | Additional CSS classes              |
+
+## Features
+
+* Token selection across multiple chains
+* Chain selection interface
+* Displays token with chain icon
+* Shows token balances (optional)
+* Searchable token list per chain
+* Responsive dialog design
+
+## Examples
+
+### Basic Multi-Chain Selection
+
+```tsx
+<MultiChainTokenInput 
+  selected={currentToken}
+  list={allChainTokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={false}
+/>
+```
+
+### With Balances
+
+```tsx
+<MultiChainTokenInput 
+  selected={currentToken}
+  list={allChainTokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={true}
+  className="w-full max-w-sm"
+/>
+```
+
+### In a Cross-Chain Form
+
+```tsx
+<form onSubmit={handleBridge}>
+  <div className="space-y-4">
+    <MultiChainTokenInput 
+      selected={sourceToken}
+      list={allTokens}
+      onSelectionChanged={setSourceToken}
+      showBalances={true}
+    />
+    <MultiChainTokenInput 
+      selected={destinationToken}
+      list={allTokens.filter(t => t.chain_id !== sourceToken.chain_id)}
+      onSelectionChanged={setDestinationToken}
+      showBalances={true}
+    />
+    <button type="submit">
+      Bridge
+    </button>
+  </div>
+</form>
+```
+
+### Custom Styling
+
+```tsx
+<MultiChainTokenInput 
+  selected={token}
+  list={tokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={true}
+  className="bg-gray-100 rounded-lg p-2"
+/>
+```
+
+## Component Structure
+
+1. **Trigger**
+   * TokenChip with chain icon
+   * Chevron down indicator
+   * Click to open dialog
+
+2. **Dialog**
+   * Header with back button
+   * Chain selection row
+   * Search input
+   * Chain-specific token list
+   * Token balances (if enabled)
+
+## Chain Selection
+
+The component automatically extracts unique chain IDs from the token list and displays them as selectable options:
+
+```tsx
+let chains = Array.from(new Set(list.map(t => t.chain_id)));
+```
+
+
+
+# MultiChainTokenInput
+URL: /docs/builderkit/components/input/multi-chain-token-input
+
+A token selection component that supports tokens across multiple chains.
+
+# MultiChainTokenInput
+
+The MultiChainTokenInput component provides a token selection interface that allows users to select tokens from different chains.
+
+## Usage
+
+```tsx
+import { MultiChainTokenInput } from '@avalabs/builderkit';
+
+// Basic usage
+<MultiChainTokenInput 
+  selected={{ 
+    address: "0x1234...", 
+    chain_id: 43114,
+    symbol: "AVAX" 
+  }}
+  list={multiChainTokenList}
+  onSelectionChanged={(token) => console.log('Selected token:', token)}
+  showBalances={true}
+/>
+```
+
+## Props
+
+| Prop                 | Type                                                         | Default | Description                         |
+| -------------------- | ------------------------------------------------------------ | ------- | ----------------------------------- |
+| `selected`           | `{ address: string, chain_id: number } & Partial<TokenItem>` | -       | Currently selected token with chain |
+| `list`               | `TokenItem[]`                                                | -       | Array of tokens across all chains   |
+| `onSelectionChanged` | `(token: TokenItem) => void`                                 | -       | Called when token selection changes |
+| `showBalances`       | `boolean`                                                    | -       | Whether to show token balances      |
+| `className`          | `string`                                                     | -       | Additional CSS classes              |
+
+## Features
+
+* Token selection across multiple chains
+* Chain selection interface
+* Displays token with chain icon
+* Shows token balances (optional)
+* Searchable token list per chain
+* Responsive dialog design
+
+## Examples
+
+### Basic Multi-Chain Selection
+
+```tsx
+<MultiChainTokenInput 
+  selected={currentToken}
+  list={allChainTokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={false}
+/>
+```
+
+### With Balances
+
+```tsx
+<MultiChainTokenInput 
+  selected={currentToken}
+  list={allChainTokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={true}
+  className="w-full max-w-sm"
+/>
+```
+
+### In a Cross-Chain Form
+
+```tsx
+<form onSubmit={handleBridge}>
+  <div className="space-y-4">
+    <MultiChainTokenInput 
+      selected={sourceToken}
+      list={allTokens}
+      onSelectionChanged={setSourceToken}
+      showBalances={true}
+    />
+    <MultiChainTokenInput 
+      selected={destinationToken}
+      list={allTokens.filter(t => t.chain_id !== sourceToken.chain_id)}
+      onSelectionChanged={setDestinationToken}
+      showBalances={true}
+    />
+    <button type="submit">
+      Bridge
+    </button>
+  </div>
+</form>
+```
+
+### Custom Styling
+
+```tsx
+<MultiChainTokenInput 
+  selected={token}
+  list={tokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={true}
+  className="bg-gray-100 rounded-lg p-2"
+/>
+```
+
+## Component Structure
+
+1. **Trigger**
+   * TokenChip with chain icon
+   * Chevron down indicator
+   * Click to open dialog
+
+2. **Dialog**
+   * Header with back button
+   * Chain selection row
+   * Search input
+   * Chain-specific token list
+   * Token balances (if enabled)
+
+## Chain Selection
+
+The component automatically extracts unique chain IDs from the token list and displays them as selectable options:
+
+```tsx
+let chains = Array.from(new Set(list.map(t => t.chain_id)));
+```
+# MultiChainTokenInput
+URL: /docs/builderkit/components/input/multi-chain-token-input
+
+A token selection component that supports tokens across multiple chains.
+
+# MultiChainTokenInput
+
+The MultiChainTokenInput component provides a token selection interface that allows users to select tokens from different chains.
+
+## Usage
+
+```tsx
+import { MultiChainTokenInput } from '@avalabs/builderkit';
+
+// Basic usage
+<MultiChainTokenInput 
+  selected={{ 
+    address: "0x1234...", 
+    chain_id: 43114,
+    symbol: "AVAX" 
+  }}
+  list={multiChainTokenList}
+  onSelectionChanged={(token) => console.log('Selected token:', token)}
+  showBalances={true}
+/>
+```
+
+## Props
+
+| Prop                 | Type                                                         | Default | Description                         |
+| -------------------- | ------------------------------------------------------------ | ------- | ----------------------------------- |
+| `selected`           | `{ address: string, chain_id: number } & Partial<TokenItem>` | -       | Currently selected token with chain |
+| `list`               | `TokenItem[]`                                                | -       | Array of tokens across all chains   |
+| `onSelectionChanged` | `(token: TokenItem) => void`                                 | -       | Called when token selection changes |
+| `showBalances`       | `boolean`                                                    | -       | Whether to show token balances      |
+| `className`          | `string`                                                     | -       | Additional CSS classes              |
+
+## Features
+
+* Token selection across multiple chains
+* Chain selection interface
+* Displays token with chain icon
+* Shows token balances (optional)
+* Searchable token list per chain
+* Responsive dialog design
+
+## Examples
+
+### Basic Multi-Chain Selection
+
+```tsx
+<MultiChainTokenInput 
+  selected={currentToken}
+  list={allChainTokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={false}
+/>
+```
+
+### With Balances
+
+```tsx
+<MultiChainTokenInput 
+  selected={currentToken}
+  list={allChainTokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={true}
+  className="w-full max-w-sm"
+/>
+```
+
+### In a Cross-Chain Form
+
+```tsx
+<form onSubmit={handleBridge}>
+  <div className="space-y-4">
+    <MultiChainTokenInput 
+      selected={sourceToken}
+      list={allTokens}
+      onSelectionChanged={setSourceToken}
+      showBalances={true}
+    />
+    <MultiChainTokenInput 
+      selected={destinationToken}
+      list={allTokens.filter(t => t.chain_id !== sourceToken.chain_id)}
+      onSelectionChanged={setDestinationToken}
+      showBalances={true}
+    />
+    <button type="submit">
+      Bridge
+    </button>
+  </div>
+</form>
+```
+
+### Custom Styling
+
+```tsx
+<MultiChainTokenInput 
+  selected={token}
+  list={tokens}
+  onSelectionChanged={handleTokenChange}
+  showBalances={true}
+  className="bg-gray-100 rounded-lg p-2"
+/>
+```
+
+## Component Structure
+
+1. **Trigger**
+   * TokenChip with chain icon
+   * Chevron down indicator
+   * Click to open dialog
+
+2. **Dialog**
+   * Header with back button
+   * Chain selection row
+   * Search input
+   * Chain-specific token list
+   * Token balances (if enabled)
+
+## Chain Selection
+
+The component automatically extracts unique chain IDs from the token list and displays them as selectable options:
+
+```tsx
+let chains = Array.from(new Set(list.map(t => t.chain_id)));
+```
+# Collectible
+URL: /docs/builderkit/components/collectibles/collectible
+
+A component for displaying NFT collectibles with metadata and image support.
+
+# Collectible
+
+The Collectible component displays NFT collectibles with automatic metadata resolution and image display.
+
+## Usage
+
+```tsx
+import { Collectible } from '@avalabs/builderkit';
+
+// Basic usage
+<Collectible 
+  chain_id={43114}
+  address="0x1234567890123456789012345678901234567890"
+  token_id={1}
+/>
+
+// With custom styling
+<Collectible 
+  chain_id={43114}
+  address="0x1234567890123456789012345678901234567890"
+  token_id={1}
+  className="border-2 rounded-xl"
+/>
+```
+
+## Props
+
+| Prop        | Type     | Default | Description                   |
+| ----------- | -------- | ------- | ----------------------------- |
+| `chain_id`  | `number` | -       | Chain ID where the NFT exists |
+| `address`   | `string` | -       | NFT contract address          |
+| `token_id`  | `number` | -       | Token ID of the NFT           |
+| `className` | `string` | -       | Additional CSS classes        |
+
+## Features
+
+* Automatic metadata resolution from IPFS
+* Displays NFT image and name
+* Shows token ID
+* Supports ERC721 standard
+* Responsive layout with fixed dimensions
+* Loading state handling
+
+## Examples
+
+### Basic NFT Display
+
+```tsx
+<Collectible 
+  chain_id={43114}
+  address="0x1234567890123456789012345678901234567890"
+  token_id={1}
+/>
+```
+
+### In a Grid Layout
+
+```tsx
+<div className="grid grid-cols-3 gap-4">
+  {nfts.map(nft => (
+    <Collectible 
+      key={nft.token_id}
+      chain_id={nft.chain_id}
+      address={nft.address}
+      token_id={nft.token_id}
+    />
+  ))}
+</div>
+```
+
+### With Custom Styling
+
+```tsx
+<Collectible 
+  chain_id={43114}
+  address="0x1234567890123456789012345678901234567890"
+  token_id={1}
+  className="shadow-lg hover:shadow-xl transition-shadow"
+/>
+```
+
+## Component Structure
+
+1. **Container**
+   * Fixed width of 120px
+   * Rounded corners
+   * Border
+   * Overflow hidden
+
+2. **Image**
+   * Fixed dimensions (120x120)
+   * Maintains aspect ratio
+   * Centered display
+
+3. **Info Section**
+   * White background
+   * Token ID display
+   * NFT name
+   * Proper padding
+
+## Metadata Resolution
+
+The component automatically:
+
+1. Fetches token URI from the contract
+2. Resolves IPFS metadata
+3. Extracts image URL and name
+4. Handles IPFS gateway resolution
+
+
+
+# Collectible
+URL: /docs/builderkit/components/collectibles/collectible
+
+A component for displaying NFT collectibles with metadata and image support.
+
+# Collectible
+
+The Collectible component displays NFT collectibles with automatic metadata resolution and image display.
+
+## Usage
+
+```tsx
+import { Collectible } from '@avalabs/builderkit';
+
+// Basic usage
+<Collectible 
+  chain_id={43114}
+  address="0x1234567890123456789012345678901234567890"
+  token_id={1}
+/>
+
+// With custom styling
+<Collectible 
+  chain_id={43114}
+  address="0x1234567890123456789012345678901234567890"
+  token_id={1}
+  className="border-2 rounded-xl"
+/>
+```
+
+## Props
+
+| Prop        | Type     | Default | Description                   |
+| ----------- | -------- | ------- | ----------------------------- |
+| `chain_id`  | `number` | -       | Chain ID where the NFT exists |
+| `address`   | `string` | -       | NFT contract address          |
+| `token_id`  | `number` | -       | Token ID of the NFT           |
+| `className` | `string` | -       | Additional CSS classes        |
+
+## Features
+
+* Automatic metadata resolution from IPFS
+* Displays NFT image and name
+* Shows token ID
+* Supports ERC721 standard
+* Responsive layout with fixed dimensions
+* Loading state handling
+
+## Examples
+
+### Basic NFT Display
+
+```tsx
+<Collectible 
+  chain_id={43114}
+  address="0x1234567890123456789012345678901234567890"
+  token_id={1}
+/>
+```
+
+### In a Grid Layout
+
+```tsx
+<div className="grid grid-cols-3 gap-4">
+  {nfts.map(nft => (
+    <Collectible 
+      key={nft.token_id}
+      chain_id={nft.chain_id}
+      address={nft.address}
+      token_id={nft.token_id}
+    />
+  ))}
+</div>
+```
+
+### With Custom Styling
+
+```tsx
+<Collectible 
+  chain_id={43114}
+  address="0x1234567890123456789012345678901234567890"
+  token_id={1}
+  className="shadow-lg hover:shadow-xl transition-shadow"
+/>
+```
+
+## Component Structure
+
+1. **Container**
+   * Fixed width of 120px
+   * Rounded corners
+   * Border
+   * Overflow hidden
+
+2. **Image**
+   * Fixed dimensions (120x120)
+   * Maintains aspect ratio
+   * Centered display
+
+3. **Info Section**
+   * White background
+   * Token ID display
+   * NFT name
+   * Proper padding
+
+## Metadata Resolution
+
+The component automatically:
+
+1. Fetches token URI from the contract
+2. Resolves IPFS metadata
+3. Extracts image URL and name
+4. Handles IPFS gateway resolution
+
+
+# TransactionManager
+URL: /docs/builderkit/components/transaction/transaction-manager
+
+A component that orchestrates multiple blockchain transactions in sequence.
+
+# TransactionManager
+
+The TransactionManager component orchestrates multiple blockchain transactions in sequence, handling the flow between steps and providing status tracking.
+
+## Usage
+
+```tsx
+import { TransactionManager } from '@avalabs/builderkit';
+
+// Basic usage
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Approve Token",
+      description: "Approving token for transfer",
+      data: approveData
+    },
+    {
+      title: "Transfer Token",
+      description: "Transferring tokens to recipient",
+      data: transferData
+    }
+  ]}
+  onTransactionSent={(timestamp) => {
+    console.log('Step completed at:', timestamp);
+  }}
+  onTransactionConfirmed={(receipt) => {
+    console.log('All transactions completed:', receipt);
+  }}
+/>
+```
+
+## Props
+
+| Prop                     | Type                          | Default | Description                           |
+| ------------------------ | ----------------------------- | ------- | ------------------------------------- |
+| `chain_id`               | `number`                      | -       | Chain ID for the transactions         |
+| `transactions`           | `TransactionProps[]`          | -       | Array of transactions to process      |
+| `onTransactionSent`      | `(timestamp: number) => void` | -       | Called when a step completes          |
+| `onTransactionConfirmed` | `(receipt: any) => void`      | -       | Called when all transactions complete |
+| `className`              | `string`                      | -       | Additional CSS classes                |
+
+## Features
+
+* Sequential transaction execution
+* Step-by-step progress tracking
+* Automatic state management
+* Transaction dependency handling
+* Consistent error handling
+* Status notifications for each step
+
+## Examples
+
+### Token Approval and Transfer
+
+```tsx
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Step 1: Approve",
+      description: "Approve token spending",
+      data: approveData
+    },
+    {
+      title: "Step 2: Transfer",
+      description: "Transfer tokens to recipient",
+      data: transferData
+    }
+  ]}
+/>
+```
+
+### Multi-step Protocol Interaction
+
+```tsx
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Step 1: Approve USDC",
+      description: "Approve USDC spending",
+      data: approveUsdcData
+    },
+    {
+      title: "Step 2: Approve AVAX",
+      description: "Approve AVAX spending",
+      data: approveAvaxData
+    },
+    {
+      title: "Step 3: Add Liquidity",
+      description: "Add liquidity to pool",
+      data: addLiquidityData
+    }
+  ]}
+/>
+```
+
+## Transaction Flow
+
+1. **Initialization**
+   * Validates transaction array
+   * Sets up initial state
+   * Prepares first transaction
+
+2. **Step Execution**
+   * Processes current transaction
+   * Waits for confirmation
+   * Updates progress state
+
+3. **Step Transition**
+   * Validates completion
+   * Moves to next transaction
+   * Updates UI state
+
+4. **Completion**
+   * Confirms all steps finished
+   * Triggers completion callback
+   * Resets internal state
+
+# TransactionManager
+URL: /docs/builderkit/components/transaction/transaction-manager
+
+A component that orchestrates multiple blockchain transactions in sequence.
+
+# TransactionManager
+
+The TransactionManager component orchestrates multiple blockchain transactions in sequence, handling the flow between steps and providing status tracking.
+
+## Usage
+
+```tsx
+import { TransactionManager } from '@avalabs/builderkit';
+
+// Basic usage
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Approve Token",
+      description: "Approving token for transfer",
+      data: approveData
+    },
+    {
+      title: "Transfer Token",
+      description: "Transferring tokens to recipient",
+      data: transferData
+    }
+  ]}
+  onTransactionSent={(timestamp) => {
+    console.log('Step completed at:', timestamp);
+  }}
+  onTransactionConfirmed={(receipt) => {
+    console.log('All transactions completed:', receipt);
+  }}
+/>
+```
+
+## Props
+
+| Prop                     | Type                          | Default | Description                           |
+| ------------------------ | ----------------------------- | ------- | ------------------------------------- |
+| `chain_id`               | `number`                      | -       | Chain ID for the transactions         |
+| `transactions`           | `TransactionProps[]`          | -       | Array of transactions to process      |
+| `onTransactionSent`      | `(timestamp: number) => void` | -       | Called when a step completes          |
+| `onTransactionConfirmed` | `(receipt: any) => void`      | -       | Called when all transactions complete |
+| `className`              | `string`                      | -       | Additional CSS classes                |
+
+## Features
+
+* Sequential transaction execution
+* Step-by-step progress tracking
+* Automatic state management
+* Transaction dependency handling
+* Consistent error handling
+* Status notifications for each step
+
+## Examples
+
+### Token Approval and Transfer
+
+```tsx
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Step 1: Approve",
+      description: "Approve token spending",
+      data: approveData
+    },
+    {
+      title: "Step 2: Transfer",
+      description: "Transfer tokens to recipient",
+      data: transferData
+    }
+  ]}
+/>
+```
+
+### Multi-step Protocol Interaction
+
+```tsx
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Step 1: Approve USDC",
+      description: "Approve USDC spending",
+      data: approveUsdcData
+    },
+    {
+      title: "Step 2: Approve AVAX",
+      description: "Approve AVAX spending",
+      data: approveAvaxData
+    },
+    {
+      title: "Step 3: Add Liquidity",
+      description: "Add liquidity to pool",
+      data: addLiquidityData
+    }
+  ]}
+/>
+```
+
+## Transaction Flow
+
+1. **Initialization**
+   * Validates transaction array
+   * Sets up initial state
+   * Prepares first transaction
+
+2. **Step Execution**
+   * Processes current transaction
+   * Waits for confirmation
+   * Updates progress state
+
+3. **Step Transition**
+   * Validates completion
+   * Moves to next transaction
+   * Updates UI state
+
+4. **Completion**
+   * Confirms all steps finished
+   * Triggers completion callback
+   * Resets internal state
+
+
+# TransactionManager
+URL: /docs/builderkit/components/transaction/transaction-manager
+
+A component that orchestrates multiple blockchain transactions in sequence.
+
+# TransactionManager
+
+The TransactionManager component orchestrates multiple blockchain transactions in sequence, handling the flow between steps and providing status tracking.
+
+## Usage
+
+```tsx
+import { TransactionManager } from '@avalabs/builderkit';
+
+// Basic usage
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Approve Token",
+      description: "Approving token for transfer",
+      data: approveData
+    },
+    {
+      title: "Transfer Token",
+      description: "Transferring tokens to recipient",
+      data: transferData
+    }
+  ]}
+  onTransactionSent={(timestamp) => {
+    console.log('Step completed at:', timestamp);
+  }}
+  onTransactionConfirmed={(receipt) => {
+    console.log('All transactions completed:', receipt);
+  }}
+/>
+```
+
+## Props
+
+| Prop                     | Type                          | Default | Description                           |
+| ------------------------ | ----------------------------- | ------- | ------------------------------------- |
+| `chain_id`               | `number`                      | -       | Chain ID for the transactions         |
+| `transactions`           | `TransactionProps[]`          | -       | Array of transactions to process      |
+| `onTransactionSent`      | `(timestamp: number) => void` | -       | Called when a step completes          |
+| `onTransactionConfirmed` | `(receipt: any) => void`      | -       | Called when all transactions complete |
+| `className`              | `string`                      | -       | Additional CSS classes                |
+
+## Features
+
+* Sequential transaction execution
+* Step-by-step progress tracking
+* Automatic state management
+* Transaction dependency handling
+* Consistent error handling
+* Status notifications for each step
+
+## Examples
+
+### Token Approval and Transfer
+
+```tsx
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Step 1: Approve",
+      description: "Approve token spending",
+      data: approveData
+    },
+    {
+      title: "Step 2: Transfer",
+      description: "Transfer tokens to recipient",
+      data: transferData
+    }
+  ]}
+/>
+```
+
+### Multi-step Protocol Interaction
+
+```tsx
+<TransactionManager
+  chain_id={43114}
+  transactions={[
+    {
+      title: "Step 1: Approve USDC",
+      description: "Approve USDC spending",
+      data: approveUsdcData
+    },
+    {
+      title: "Step 2: Approve AVAX",
+      description: "Approve AVAX spending",
+      data: approveAvaxData
+    },
+    {
+      title: "Step 3: Add Liquidity",
+      description: "Add liquidity to pool",
+      data: addLiquidityData
+    }
+  ]}
+/>
+```
+
+## Transaction Flow
+
+1. **Initialization**
+   * Validates transaction array
+   * Sets up initial state
+   * Prepares first transaction
+
+2. **Step Execution**
+   * Processes current transaction
+   * Waits for confirmation
+   * Updates progress state
+
+3. **Step Transition**
+   * Validates completion
+   * Moves to next transaction
+   * Updates UI state
+
+4. **Completion**
+   * Confirms all steps finished
+   * Triggers completion callback
+   * Resets internal state
+
+# ChainRow
+URL: /docs/builderkit/components/chains/chain-row
+
+A component for displaying chain information in a row layout with icon and name.
+
+# ChainRow
+
+The ChainRow component displays chain information in a horizontal layout, combining a chain icon with its name.
+
+## Usage
+
+```tsx
+import { ChainRow } from '@avalabs/builderkit';
+
+// Basic usage
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+/>
+
+// With custom styling
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+  className="bg-gray-100 p-2 rounded-lg"
+/>
+```
+
+## Props
+
+| Prop        | Type     | Default | Description            |
+| ----------- | -------- | ------- | ---------------------- |
+| `chain_id`  | `number` | -       | Chain ID               |
+| `name`      | `string` | -       | Chain name             |
+| `className` | `string` | -       | Additional CSS classes |
+
+## Features
+
+* Combines ChainIcon with chain name
+* Horizontal layout with proper spacing
+* Flexible styling through className
+* Simple and lightweight implementation
+* Consistent alignment and spacing
+
+## Examples
+
+### Basic Chain Display
+
+```tsx
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+/>
+```
+
+### In a List
+
+```tsx
+<div className="flex flex-col gap-2">
+  <ChainRow 
+    chain_id={43114}
+    name="Avalanche C-Chain"
+  />
+  <ChainRow 
+    chain_id={43113}
+    name="Fuji Testnet"
+  />
+</div>
+```
+
+### Interactive Row
+
+```tsx
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+  className="hover:bg-gray-100 cursor-pointer"
+/>
+```
+
+### With Custom Styling
+
+```tsx
+<ChainRow 
+  chain_id={43114}
+  name="Avalanche C-Chain"
+  className="border border-gray-200 rounded-lg p-3 shadow-xs"
+/>
+```
+
+## Layout Structure
+
+The component uses a flex layout with:
+
+* ChainIcon on the left
+* Chain name on the right
+* Gap between icon and name
+* Center alignment of items
+
 globs:
-alwaysApply: false
+alwaysApply: true
 ---

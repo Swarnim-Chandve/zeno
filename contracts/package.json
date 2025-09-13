@@ -1,0 +1,21 @@
+{
+  "name": "math-duel-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Math Duel Game on Avalanche",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js --network fuji",
+    "deploy:demo": "hardhat run scripts/deploy-demo.js --network fuji",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
+    "dotenv": "^17.2.2"
+  }
+}

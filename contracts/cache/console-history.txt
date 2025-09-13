@@ -1,0 +1,4 @@
+cd /home/swarnim/Desktop/hackathons/zeno/contracts && echo "exit" | npx hardhat console --network fuji
+echo "PRIVATE_KEY=66c1cb04d1331b2fcf6ed253498220511fbcec200fa7cee5529a0eab5229162f" > .env && echo "REPORT_GAS=true" >> .env
+cat .env
+exit
