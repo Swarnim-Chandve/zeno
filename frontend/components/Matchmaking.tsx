@@ -35,7 +35,7 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     
     // For now, use polling instead of WebSocket for deployed version
     const useWebSocket = backendUrl.includes('localhost')
-    let websocket = null
+    let websocket: WebSocket | null = null
     
     if (useWebSocket) {
       websocket = new WebSocket(wsUrl)
