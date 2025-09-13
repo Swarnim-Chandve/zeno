@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useAccount } from 'wagmi'
-import { Loader2, Users, X, Clock, User, Wifi, WifiOff } from 'lucide-react'
+import { Loader2, Users, X, Clock, User, Wifi, WifiOff, QrCode, Copy, Check } from 'lucide-react'
+import QRCode from 'qrcode'
 
 interface MatchmakingProps {
   onMatchFound: (match: any) => void
@@ -28,8 +29,56 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
   const [retryCount, setRetryCount] = useState(0)
   const [mode, setMode] = useState<'create' | 'join'>('create')
   const [joinLobbyId, setJoinLobbyId] = useState('')
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('')
+  const [copied, setCopied] = useState(false)
+  const [showQR, setShowQR] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
+
+  // Generate QR code for lobby sharing
+  const generateQRCode = async (lobbyId: string) => {
+    try {
+      const lobbyUrl = `${window.location.origin}?join=${lobbyId}`
+      const qrCodeDataURL = await QRCode.toDataURL(lobbyUrl, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+      setQrCodeUrl(qrCodeDataURL)
+    } catch (error) {
+      console.error('Error generating QR code:', error)
+    }
+  }
+
+  // Copy lobby ID to clipboard
+  const copyLobbyId = async () => {
+    if (lobbyId) {
+      try {
+        await navigator.clipboard.writeText(lobbyId)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch (error) {
+        console.error('Failed to copy:', error)
+      }
+    }
+  }
+
+  // Copy lobby URL to clipboard
+  const copyLobbyUrl = async () => {
+    if (lobbyId) {
+      try {
+        const lobbyUrl = `${window.location.origin}?join=${lobbyId}`
+        await navigator.clipboard.writeText(lobbyUrl)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch (error) {
+        console.error('Failed to copy URL:', error)
+      }
+    }
+  }
 
   // Create lobby function
   const createLobby = async () => {
@@ -61,6 +110,9 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
         setLobbyId(data.lobbyId)
         setMatchId(data.lobbyId)
         setStatus('waiting')
+        
+        // Generate QR code for sharing
+        await generateQRCode(data.lobbyId)
         
         // Start polling for other players
         const pollForPlayers = async () => {
@@ -124,16 +176,36 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
   // Join lobby function
   const joinLobby = async () => {
     const currentAddress = isDemoMode ? playerAddress : address
-    if (!currentAddress) return
+    if (!currentAddress) {
+      setError('Wallet not connected')
+      return
+    }
+
+    if (!joinLobbyId.trim()) {
+      setError('Please enter a lobby ID')
+      return
+    }
+
+    // Validate lobby ID format
+    if (!joinLobbyId.startsWith('lobby_')) {
+      setError('Invalid lobby ID format. Lobby ID should start with "lobby_"')
+      return
+    }
 
     const playerId = playerIdRef.current || `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     playerIdRef.current = playerId
 
     try {
-      const response = await fetch(`/api/websocket?action=join-lobby&playerId=${playerId}&playerAddress=${currentAddress}&lobbyId=${joinLobbyId}`)
+      const response = await fetch(`/api/websocket?action=join-lobby&playerId=${playerId}&playerAddress=${currentAddress}&lobbyId=${joinLobbyId.trim()}`)
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        if (response.status === 404) {
+          throw new Error('Lobby not found. Please check the lobby ID and try again.')
+        } else if (response.status === 400) {
+          throw new Error('Lobby is full or you are already in this lobby.')
+        } else {
+          throw new Error(`Server error: ${response.status}`)
+        }
       }
       
       const text = await response.text()
@@ -144,13 +216,14 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
       } catch (parseError) {
         console.error('JSON parse error:', parseError)
         console.error('Response text:', text)
-        throw new Error('Invalid JSON response from server')
+        throw new Error('Invalid response from server. Please try again.')
       }
       
       if (data.type === 'player_joined') {
-        setLobbyId(joinLobbyId)
-        setMatchId(joinLobbyId)
+        setLobbyId(joinLobbyId.trim())
+        setMatchId(joinLobbyId.trim())
         setStatus('waiting')
+        setError(null) // Clear any previous errors
         
         // Start polling for game start
         const pollForGameStart = async () => {
@@ -203,6 +276,22 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
       setError(`Failed to join lobby: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
+
+  // Check for join parameter in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const joinLobbyId = urlParams.get('join')
+    if (joinLobbyId) {
+      setMode('join')
+      setJoinLobbyId(joinLobbyId)
+      // Auto-join the lobby
+      setTimeout(() => {
+        setStatus('connecting')
+        setError(null)
+        joinLobby()
+      }, 1000)
+    }
+  }, [])
 
   // WebSocket/API connection
   useEffect(() => {
@@ -499,10 +588,47 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
           </div>
 
           {status === 'waiting' && (
-            <div className="text-center">
+            <div className="text-center space-y-4">
               <div className="animate-pulse text-white/60">
                 Share this lobby ID: <span className="font-mono bg-white/20 px-2 py-1 rounded">{lobbyId}</span>
               </div>
+              
+              {/* Copy and QR Code buttons */}
+              <div className="flex flex-col space-y-2">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={copyLobbyId}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    <span>{copied ? 'Copied!' : 'Copy ID'}</span>
+                  </button>
+                  
+                  <button
+                    onClick={copyLobbyUrl}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    <span>{copied ? 'Copied!' : 'Copy URL'}</span>
+                  </button>
+                </div>
+                
+                <button
+                  onClick={() => setShowQR(!showQR)}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span>{showQR ? 'Hide QR Code' : 'Show QR Code'}</span>
+                </button>
+              </div>
+              
+              {/* QR Code display */}
+              {showQR && qrCodeUrl && (
+                <div className="flex flex-col items-center space-y-2">
+                  <img src={qrCodeUrl} alt="Lobby QR Code" className="w-48 h-48 bg-white p-2 rounded-lg" />
+                  <p className="text-white/60 text-sm">Scan to join this lobby</p>
+                </div>
+              )}
             </div>
           )}
 
