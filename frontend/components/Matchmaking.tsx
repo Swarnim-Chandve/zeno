@@ -23,7 +23,9 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
   const [error, setError] = useState<string | null>(null)
   const [waitingPlayers, setWaitingPlayers] = useState<WaitingPlayer[]>([])
   const [totalOnline, setTotalOnline] = useState(0)
-  // WebSocket removed - using API polling only
+  // Frontend-only matchmaking as workaround for API issues
+  const [localMatches, setLocalMatches] = useState<Map<string, any>>(new Map())
+  const [localPlayers, setLocalPlayers] = useState<Map<string, string>>(new Map())
 
   useEffect(() => {
     const currentAddress = isDemoMode ? playerAddress : address
@@ -32,65 +34,88 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     // For deployed version, use polling only (WebSocket disabled)
     // No WebSocket setup needed
 
-    const findMatch = async () => {
+    // Frontend-only matchmaking system
+    const findMatch = () => {
       try {
-        const response = await fetch('/api/match', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ playerAddress: currentAddress }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to find match')
+        // Check if player is already in a match
+        if (localPlayers.has(currentAddress)) {
+          setError('Player already in a match')
+          setStatus('error')
+          return
         }
-
-        const data = await response.json()
-        setMatchId(data.matchId)
         
-        if (data.status === 'ready') {
-          setStatus('found')
-          onMatchFound({ ...data, playerAddress: currentAddress })
-        } else {
-          setStatus('waiting')
+        // Look for available match or create new one
+        let foundMatchId = null
+        for (const [id, match] of localMatches) {
+          if (match.players.length === 1 && !match.players.includes(currentAddress)) {
+            foundMatchId = id
+            break
+          }
         }
+        
+        if (!foundMatchId) {
+          // Create new match
+          foundMatchId = `match_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          const newMatch = {
+            id: foundMatchId,
+            players: [currentAddress],
+            questions: [],
+            answers: new Map(),
+            status: 'waiting',
+            createdAt: Date.now()
+          }
+          setLocalMatches(prev => new Map(prev).set(foundMatchId, newMatch))
+          setStatus('waiting')
+        } else {
+          // Join existing match
+          setLocalMatches(prev => {
+            const newMap = new Map(prev)
+            const match = newMap.get(foundMatchId)
+            if (match) {
+              match.players.push(currentAddress)
+              match.status = 'ready'
+            }
+            return newMap
+          })
+          setStatus('found')
+          onMatchFound({ 
+            matchId: foundMatchId, 
+            status: 'ready', 
+            players: [currentAddress, ...(localMatches.get(foundMatchId)?.players || [])],
+            playerAddress: currentAddress 
+          })
+        }
+        
+        setMatchId(foundMatchId)
+        setLocalPlayers(prev => new Map(prev).set(currentAddress, foundMatchId))
+        
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
+        console.error('Matchmaking error:', err)
+        setError('Matchmaking failed')
         setStatus('error')
       }
     }
 
     findMatch()
 
-    // Polling for deployed version
-    const pollInterval = setInterval(async () => {
-      try {
-        // Check match status
-        if (matchId) {
-          const response = await fetch(`/api/match?matchId=${matchId}`)
-          if (response.ok) {
-            const data = await response.json()
-            if (data.status === 'ready') {
-              setStatus('found')
-              onMatchFound({ ...data, playerAddress: currentAddress })
-            }
-          }
-        }
-        
-        // Check global queue status
-        const queueResponse = await fetch('/api/match')
-        if (queueResponse.ok) {
-          const queueData = await queueResponse.json()
-          if (queueData.waitingPlayers) {
-            setWaitingPlayers(queueData.waitingPlayers)
-            setTotalOnline(queueData.totalWaiting || 0)
-          }
-        }
-      } catch (err) {
-        console.log('Polling error:', err)
-      }
-    }, 2000)
+    // Update online player count from local state
+    const updateOnlineCount = () => {
+      const allWaitingPlayers = Array.from(localMatches.values())
+        .filter(match => match.status === 'waiting')
+        .flatMap(match => match.players.map(address => ({
+          address,
+          joinedAt: match.createdAt
+        })));
+      
+      setWaitingPlayers(allWaitingPlayers)
+      setTotalOnline(allWaitingPlayers.length)
+    }
+    
+    // Update online count every 2 seconds
+    const pollInterval = setInterval(updateOnlineCount, 2000)
+    
+    // Initial update
+    updateOnlineCount()
 
     return () => {
       if (pollInterval) {

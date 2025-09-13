@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       });
       
       // Check if both players have answered all questions
-      const allPlayersAnswered = match.players.every(player => {
+      const allPlayersAnswered = match.players.every((player: string) => {
         const answers = match.answers.get(player) || [];
         return answers.length >= match.questions.length;
       });
