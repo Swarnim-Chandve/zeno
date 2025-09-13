@@ -101,7 +101,7 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
     }
     
     try {
-      const ws = new WebSocket(wsUrl)
+      const ws = new WebSocket(wsUrl!)
       wsRef.current = ws
 
       ws.onopen = () => {
