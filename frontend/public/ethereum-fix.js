@@ -1,20 +1,25 @@
-// Enhanced Ethereum property protection - prevents all redefinition attempts
+// Improved Ethereum property protection - prevents conflicts without breaking functionality
 (function() {
   'use strict';
   
   if (typeof window === 'undefined') return;
   
+  // Only run if ethereum property doesn't exist yet
+  if (window.ethereum) {
+    console.log('Ethereum property already exists, skipping protection setup');
+    return;
+  }
+  
   // Store original methods
   const originalDefineProperty = Object.defineProperty;
   const originalDefineProperties = Object.defineProperties;
-  const originalSetPrototypeOf = Object.setPrototypeOf;
   
-  // Enhanced defineProperty override
+  // Override defineProperty to handle ethereum property gracefully
   Object.defineProperty = function(obj, prop, descriptor) {
-    // Block ethereum redefinition attempts
+    // Allow ethereum property definition only if it doesn't exist
     if (prop === 'ethereum' && obj === window) {
       if (window.ethereum) {
-        console.log('Blocking ethereum property redefinition - property already exists');
+        console.log('Ethereum property already exists, skipping redefinition');
         return obj;
       }
     }
@@ -22,16 +27,20 @@
     try {
       return originalDefineProperty.call(this, obj, prop, descriptor);
     } catch (error) {
-      console.warn('Property redefinition failed:', prop, error.message);
-      return obj;
+      // Silently handle ethereum redefinition errors
+      if (prop === 'ethereum' && error.message.includes('Cannot redefine property')) {
+        console.log('Ethereum property redefinition blocked');
+        return obj;
+      }
+      throw error;
     }
   };
   
-  // Enhanced defineProperties override
+  // Override defineProperties to handle ethereum property gracefully
   Object.defineProperties = function(obj, props) {
     if (obj === window && props && props.ethereum) {
       if (window.ethereum) {
-        console.log('Blocking ethereum property redefinition via defineProperties');
+        console.log('Ethereum property already exists, skipping defineProperties');
         return obj;
       }
     }
@@ -39,53 +48,23 @@
     try {
       return originalDefineProperties.call(this, obj, props);
     } catch (error) {
-      console.warn('Properties redefinition failed:', error.message);
-      return obj;
-    }
-  };
-  
-  // Protect against prototype manipulation
-  Object.setPrototypeOf = function(obj, prototype) {
-    if (obj === window && prototype && prototype.ethereum) {
-      if (window.ethereum) {
-        console.log('Blocking ethereum prototype manipulation');
+      // Silently handle ethereum redefinition errors
+      if (error.message.includes('Cannot redefine property')) {
+        console.log('Ethereum property redefinition via defineProperties blocked');
         return obj;
       }
-    }
-    
-    try {
-      return originalSetPrototypeOf.call(this, obj, prototype);
-    } catch (error) {
-      console.warn('Prototype manipulation failed:', error.message);
-      return obj;
+      throw error;
     }
   };
   
-  // Make ethereum property non-configurable if it exists
-  if (window.ethereum) {
-    try {
-      Object.defineProperty(window, 'ethereum', {
-        value: window.ethereum,
-        writable: true,
-        enumerable: true,
-        configurable: false
-      });
-      console.log('Ethereum property protected successfully');
-    } catch (e) {
-      console.log('Ethereum property already protected');
-    }
-  }
-  
-  // Monitor for injection attempts and suppress React errors
-  let injectionAttempts = 0;
+  // Suppress specific console errors that are caused by wallet injection
   const originalConsoleError = console.error;
   console.error = function(...args) {
     const message = args[0]?.toString() || '';
     
-    // Block ethereum redefinition errors
+    // Suppress ethereum redefinition errors
     if (message.includes('Cannot redefine property: ethereum')) {
-      injectionAttempts++;
-      console.log(`Ethereum injection attempt #${injectionAttempts} blocked`);
+      console.log('Ethereum redefinition error suppressed');
       return;
     }
     
@@ -98,6 +77,6 @@
     originalConsoleError.apply(console, args);
   };
   
-  console.log('Enhanced Ethereum property protection loaded');
+  console.log('Ethereum property protection loaded');
 })();
 

@@ -11,8 +11,9 @@ export async function GET(request: NextRequest) {
   // Since Vercel doesn't support WebSocket upgrades in serverless functions,
   // we'll use a polling-based approach for production
   
-  const { searchParams } = new URL(request.url)
-  const action = searchParams.get('action')
+  try {
+    const { searchParams } = new URL(request.url)
+    const action = searchParams.get('action')
   
   if (action === 'create-lobby') {
     const playerId = searchParams.get('playerId')
@@ -280,6 +281,10 @@ export async function GET(request: NextRequest) {
   }
   
   return Response.json({ error: 'Invalid action' }, { status: 400 })
+  } catch (error) {
+    console.error('WebSocket API error:', error)
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function POST(request: NextRequest) {

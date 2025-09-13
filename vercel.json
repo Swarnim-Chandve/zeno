@@ -8,10 +8,6 @@
   ],
   "routes": [
     {
-      "src": "/api/websocket",
-      "dest": "/api/websocket"
-    },
-    {
       "src": "/(.*)",
       "dest": "frontend/$1"
     }

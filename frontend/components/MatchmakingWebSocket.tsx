@@ -25,6 +25,7 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
   const [totalOnline, setTotalOnline] = useState(0)
   const [lobbyId, setLobbyId] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
   const wsRef = useRef<WebSocket | null>(null)
   const playerIdRef = useRef<string | null>(null)
 
@@ -54,7 +55,21 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
       const createLobby = async () => {
         try {
           const response = await fetch(`/api/websocket?action=create-lobby&playerId=${playerId}&playerAddress=${currentAddress}`)
-          const data = await response.json()
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+          
+          const text = await response.text()
+          let data
+          
+          try {
+            data = JSON.parse(text)
+          } catch (parseError) {
+            console.error('JSON parse error:', parseError)
+            console.error('Response text:', text)
+            throw new Error('Invalid JSON response from server')
+          }
           
           if (data.type === 'lobby_created') {
             setLobbyId(data.lobbyId)
@@ -65,7 +80,21 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
             const pollForPlayers = async () => {
               try {
                 const statusResponse = await fetch(`/api/websocket?action=get-lobby-status&lobbyId=${data.lobbyId}`)
-                const statusData = await statusResponse.json()
+                
+                if (!statusResponse.ok) {
+                  throw new Error(`HTTP error! status: ${statusResponse.status}`)
+                }
+                
+                const statusText = await statusResponse.text()
+                let statusData
+                
+                try {
+                  statusData = JSON.parse(statusText)
+                } catch (parseError) {
+                  console.error('JSON parse error in polling:', parseError)
+                  console.error('Response text:', statusText)
+                  throw new Error('Invalid JSON response from server')
+                }
                 
                 if (statusData.players.length >= 2) {
                   setStatus('found')
@@ -82,7 +111,7 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
               } catch (error) {
                 console.error('Error polling for players:', error)
                 setStatus('error')
-                setError('Failed to check for players')
+                setError(`Failed to check for players: ${error instanceof Error ? error.message : 'Unknown error'}`)
               }
             }
             
@@ -92,7 +121,17 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
         } catch (error) {
           console.error('Error creating lobby:', error)
           setStatus('error')
-          setError('Failed to create lobby')
+          setError(`Failed to create lobby: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          
+          // Retry mechanism
+          if (retryCount < 3) {
+            setRetryCount(prev => prev + 1)
+            setTimeout(() => {
+              setStatus('connecting')
+              setError(null)
+              createLobby()
+            }, 2000 * retryCount) // Exponential backoff
+          }
         }
       }
       
@@ -306,6 +345,22 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
               <div className="text-green-400 font-medium">
                 🎮 Game starting in 3 seconds...
               </div>
+            </div>
+          )}
+
+          {status === 'error' && (
+            <div className="text-center">
+              <div className="text-red-400 font-medium mb-2">
+                Connection Error
+              </div>
+              <div className="text-red-300 text-sm mb-4">
+                {error}
+              </div>
+              {retryCount > 0 && retryCount < 3 && (
+                <div className="text-xs text-red-300 mb-2">
+                  Retrying... (Attempt {retryCount + 1}/3)
+                </div>
+              )}
             </div>
           )}
         </div>
