@@ -5,7 +5,18 @@ import { WagmiProvider, createConfig, http } from 'wagmi'
 import { avalancheFuji } from 'wagmi/chains'
 import { injected, metaMask } from 'wagmi/connectors'
 import { createClient } from 'viem'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+// Prevent ethereum property redefinition errors
+if (typeof window !== 'undefined') {
+  const originalDefineProperty = Object.defineProperty
+  Object.defineProperty = function(obj, prop, descriptor) {
+    if (prop === 'ethereum' && obj === window && window.ethereum) {
+      return obj
+    }
+    return originalDefineProperty.call(this, obj, prop, descriptor)
+  }
+}
 
 const config = createConfig({
   chains: [avalancheFuji],
