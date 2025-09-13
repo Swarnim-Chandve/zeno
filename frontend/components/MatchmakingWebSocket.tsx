@@ -18,7 +18,7 @@ interface WaitingPlayer {
 
 export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false, playerAddress }: MatchmakingProps) {
   const { address } = useAccount()
-  const [status, setStatus] = useState<'searching' | 'found' | 'error' | 'waiting' | 'connecting'>('connecting')
+  const [status, setStatus] = useState<'searching' | 'found' | 'error' | 'waiting' | 'connecting' | 'idle'>('connecting')
   const [matchId, setMatchId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [waitingPlayers, setWaitingPlayers] = useState<WaitingPlayer[]>([])
