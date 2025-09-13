@@ -40,10 +40,12 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     if (useWebSocket) {
       websocket = new WebSocket(wsUrl)
       websocket.onopen = () => {
-        websocket.send(JSON.stringify({
-          type: 'join_matchmaking',
-          playerAddress: currentAddress
-        }))
+        if (websocket) {
+          websocket.send(JSON.stringify({
+            type: 'join_matchmaking',
+            playerAddress: currentAddress
+          }))
+        }
       }
 
       websocket.onmessage = (event) => {
