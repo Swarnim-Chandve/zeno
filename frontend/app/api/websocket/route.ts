@@ -310,6 +310,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action, ...params } = body
     
+    // Add CORS headers
+    const headers = new Headers()
+    headers.set('Access-Control-Allow-Origin', '*')
+    headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    headers.set('Access-Control-Allow-Headers', 'Content-Type')
+    headers.set('Content-Type', 'application/json')
+    
     // Handle POST requests for more complex operations
     if (action === 'create-lobby') {
       const { playerId, playerAddress } = params
