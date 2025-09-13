@@ -22,6 +22,7 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
   const [matchId, setMatchId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [waitingPlayers, setWaitingPlayers] = useState<WaitingPlayer[]>([])
+  const [totalOnline, setTotalOnline] = useState(0)
   // WebSocket removed - using API polling only
 
   useEffect(() => {
@@ -65,12 +66,25 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     // Polling for deployed version
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/match?matchId=${matchId}`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.status === 'ready') {
-            setStatus('found')
-            onMatchFound({ ...data, playerAddress: currentAddress })
+        // Check match status
+        if (matchId) {
+          const response = await fetch(`/api/match?matchId=${matchId}`)
+          if (response.ok) {
+            const data = await response.json()
+            if (data.status === 'ready') {
+              setStatus('found')
+              onMatchFound({ ...data, playerAddress: currentAddress })
+            }
+          }
+        }
+        
+        // Check global queue status
+        const queueResponse = await fetch('/api/match')
+        if (queueResponse.ok) {
+          const queueData = await queueResponse.json()
+          if (queueData.waitingPlayers) {
+            setWaitingPlayers(queueData.waitingPlayers)
+            setTotalOnline(queueData.totalWaiting || 0)
           }
         }
       } catch (err) {
@@ -127,6 +141,43 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
              status === 'waiting' ? 'Waiting for Opponent' : 
              'Match Found!'}
           </h2>
+          
+          {/* Online Players Count */}
+          <div className="bg-avalanche-50 border border-avalanche-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Users className="w-5 h-5 text-avalanche-500" />
+              <span className="text-lg font-semibold text-avalanche-700">
+                {totalOnline} Player{totalOnline !== 1 ? 's' : ''} Online
+              </span>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+            <p className="text-sm text-avalanche-600 mb-3">
+              {totalOnline === 0 
+                ? 'Be the first to join the queue!' 
+                : totalOnline === 1 
+                ? '1 player waiting for a match' 
+                : `${totalOnline} players looking for opponents`
+              }
+            </p>
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/match')
+                  if (response.ok) {
+                    const data = await response.json()
+                    setWaitingPlayers(data.waitingPlayers || [])
+                    setTotalOnline(data.totalWaiting || 0)
+                  }
+                } catch (err) {
+                  console.log('Refresh error:', err)
+                }
+              }}
+              className="text-xs text-avalanche-600 hover:text-avalanche-700 underline"
+            >
+              🔄 Refresh Queue
+            </button>
+          </div>
+          
           <p className="text-gray-600 mb-6">
             {status === 'searching' 
               ? 'Searching for an opponent...' 

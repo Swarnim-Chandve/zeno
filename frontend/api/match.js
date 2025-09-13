@@ -56,20 +56,44 @@ export default function handler(req, res) {
     
     players.set(playerAddress, matchId);
     
+    // Get all waiting players (players in matches with status 'waiting')
+    const waitingPlayers = Array.from(matches.values())
+      .filter(match => match.status === 'waiting')
+      .flatMap(match => match.players.map(address => ({
+        address,
+        joinedAt: match.createdAt
+      })));
+
     res.json({ 
       matchId, 
       status: matches.get(matchId).status,
-      players: matches.get(matchId).players.length 
+      players: matches.get(matchId).players.length,
+      waitingPlayers
     });
   } else if (req.method === 'GET') {
     const { matchId } = req.query;
-    const match = matches.get(matchId);
     
-    if (!match) {
-      return res.status(404).json({ error: 'Match not found' });
+    if (matchId) {
+      // Get specific match
+      const match = matches.get(matchId);
+      if (!match) {
+        return res.status(404).json({ error: 'Match not found' });
+      }
+      res.json(match);
+    } else {
+      // Get all waiting players (global queue status)
+      const waitingPlayers = Array.from(matches.values())
+        .filter(match => match.status === 'waiting')
+        .flatMap(match => match.players.map(address => ({
+          address,
+          joinedAt: match.createdAt
+        })));
+      
+      res.json({ 
+        waitingPlayers,
+        totalWaiting: waitingPlayers.length
+      });
     }
-    
-    res.json(match);
   } else {
     res.status(405).json({ error: 'Method not allowed' });
   }
