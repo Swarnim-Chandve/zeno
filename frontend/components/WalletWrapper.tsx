@@ -21,10 +21,22 @@ export function WalletWrapper({ children }: WalletWrapperProps) {
     setIsClient(true)
   }, [])
 
-  // Only use wagmi hooks after client-side hydration
+  // Always call hooks, but handle the state properly
   const account = useAccount()
   const connect = useConnect()
   const disconnect = useDisconnect()
+
+  // Don't render until client-side to prevent hydration issues
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-avalanche-50 to-avalanche-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-avalanche-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
