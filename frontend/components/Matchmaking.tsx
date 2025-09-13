@@ -29,12 +29,8 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     const currentAddress = isDemoMode ? playerAddress : address
     if (!currentAddress) return
 
-    // Connect to WebSocket for real-time updates
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
-    const wsUrl = backendUrl.replace('http', 'ws').replace('https', 'wss')
-    
-    // For now, use polling instead of WebSocket for deployed version
-    const useWebSocket = backendUrl.includes('localhost')
+    // For deployed version, disable WebSocket and use polling only
+    const useWebSocket = false // Disable WebSocket for production
     let websocket: WebSocket | null = null
     
     if (useWebSocket) {
