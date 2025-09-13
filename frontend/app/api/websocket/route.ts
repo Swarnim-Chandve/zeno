@@ -14,13 +14,20 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action')
+    
+    // Add CORS headers
+    const headers = new Headers()
+    headers.set('Access-Control-Allow-Origin', '*')
+    headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    headers.set('Access-Control-Allow-Headers', 'Content-Type')
+    headers.set('Content-Type', 'application/json')
   
   if (action === 'create-lobby') {
     const playerId = searchParams.get('playerId')
     const playerAddress = searchParams.get('playerAddress')
     
     if (!playerId || !playerAddress) {
-      return Response.json({ error: 'Missing required parameters' }, { status: 400 })
+      return Response.json({ error: 'Missing required parameters' }, { status: 400, headers })
     }
     
     // Generate lobby ID
@@ -55,7 +62,7 @@ export async function GET(request: NextRequest) {
       type: 'lobby_created',
       lobbyId,
       players: [playerId]
-    })
+    }, { headers })
   }
   
   if (action === 'join-lobby') {
@@ -285,6 +292,17 @@ export async function GET(request: NextRequest) {
     console.error('WebSocket API error:', error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  })
 }
 
 export async function POST(request: NextRequest) {
