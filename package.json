@@ -9,7 +9,7 @@
     "dev:frontend": "cd frontend && npm run dev",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:frontend\"",
     "deploy": "cd contracts && npm run deploy",
-    "build": "cd frontend && npm run build",
+    "build": "cd frontend && npm install && npm run build",
     "start": "cd frontend && npm start"
   },
   "devDependencies": {
