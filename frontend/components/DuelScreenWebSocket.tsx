@@ -226,6 +226,15 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     setIsCorrect(correct)
     setShowResult(true)
 
+    // Update player score immediately
+    if (correct) {
+      setPlayers(prev => prev.map(p => 
+        p.address === currentAddress 
+          ? { ...p, score: p.score + 1 }
+          : p
+      ))
+    }
+
     // Send answer to server
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
@@ -309,6 +318,26 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     )
   }
 
+  // Update leaderboard when game finishes
+  useEffect(() => {
+    if (gameStatus === 'finished' && currentAddress) {
+      const userScore = getPlayerScore(currentAddress)
+      const opponentScore = getOpponentScore()
+      const isWinner = userScore > opponentScore
+      const isTie = userScore === opponentScore
+      
+      // Calculate score points (base score + bonus for winning)
+      let scorePoints = userScore * 10 // 10 points per correct answer
+      if (isWinner) scorePoints += 50 // Bonus for winning
+      if (isTie) scorePoints += 25 // Bonus for tie
+      
+      // Update leaderboard
+      if ((window as any).addPlayerScore) {
+        (window as any).addPlayerScore(currentAddress, scorePoints, isWinner)
+      }
+    }
+  }, [gameStatus, currentAddress])
+
   if (gameStatus === 'finished') {
     const winner = getWinner()
     const isWinner = winner === currentAddress
@@ -344,6 +373,16 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Score Points Earned */}
+          <div className="bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 rounded-lg p-4 mb-6 border border-yellow-500/30">
+            <div className="text-yellow-400 font-bold text-lg">
+              +{getPlayerScore(currentAddress) * 10 + (isWinner ? 50 : isTie ? 25 : 0)} points earned!
+            </div>
+            <div className="text-yellow-300 text-sm">
+              {isWinner ? 'Winner bonus: +50' : isTie ? 'Tie bonus: +25' : 'Base score only'}
             </div>
           </div>
 

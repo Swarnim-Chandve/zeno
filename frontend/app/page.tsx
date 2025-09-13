@@ -6,6 +6,7 @@ import { Wallet, Play, Trophy, Users } from 'lucide-react'
 import { MatchmakingWebSocket } from '@/components/MatchmakingWebSocket'
 import { DuelScreenWebSocket } from '@/components/DuelScreenWebSocket'
 import { Results } from '@/components/Results'
+import { Leaderboard } from '@/components/Leaderboard'
 
 export default function Home() {
   const { address, isConnected } = useAccount()
@@ -122,8 +123,11 @@ export default function Home() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Game Card */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Duel?</h2>
               <p className="text-gray-600 text-lg">
@@ -182,6 +186,11 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Leaderboard Section */}
+        <div className="max-w-7xl mx-auto mt-8">
+          <Leaderboard />
         </div>
       </div>
     </div>
