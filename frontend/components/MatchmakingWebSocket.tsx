@@ -172,8 +172,8 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
       }
     }
 
-    // Poll every 3 seconds
-    const interval = setInterval(pollOnlinePlayers, 3000)
+    // Poll every 2 seconds for more real-time updates
+    const interval = setInterval(pollOnlinePlayers, 2000)
     pollOnlinePlayers() // Initial fetch
 
     return () => clearInterval(interval)

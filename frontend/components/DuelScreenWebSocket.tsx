@@ -49,6 +49,7 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
   const [showResult, setShowResult] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
   const [wsConnected, setWsConnected] = useState(false)
+  const [scoreAnimation, setScoreAnimation] = useState<'user' | 'opponent' | null>(null)
   
   const wsRef = useRef<WebSocket | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -126,6 +127,7 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
               break
               
             case 'answer_submitted':
+              // Update opponent's answer
               if (message.playerId !== currentAddress) {
                 setOpponentAnswers(prev => [...prev, {
                   questionId: message.questionId,
@@ -133,6 +135,13 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
                   isCorrect: message.isCorrect,
                   timestamp: Date.now()
                 }])
+                
+                // Update opponent's score in real-time
+                setPlayers(prev => prev.map(p => 
+                  p.address === message.playerId 
+                    ? { ...p, score: message.score || p.score }
+                    : p
+                ))
               }
               break
               
@@ -153,6 +162,33 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
                 score: p.score,
                 answers: []
               })))
+              break
+              
+            case 'score_update':
+              // Real-time score update for any player
+              setPlayers(prev => prev.map(p => 
+                p.address === message.playerId 
+                  ? { ...p, score: message.score }
+                  : p
+              ))
+              
+              // Trigger score animation
+              if (message.playerId === currentAddress) {
+                setScoreAnimation('user')
+              } else {
+                setScoreAnimation('opponent')
+              }
+              
+              // Clear animation after a short delay
+              setTimeout(() => setScoreAnimation(null), 1000)
+              break
+              
+            case 'score_sync':
+              // Periodic score synchronization
+              setPlayers(prev => prev.map(p => {
+                const updatedPlayer = message.playerScores.find((ps: any) => ps.playerId === p.address);
+                return updatedPlayer ? { ...p, score: updatedPlayer.score } : p;
+              }))
               break
           }
         } catch (err) {
@@ -435,12 +471,30 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
         {/* Scores */}
         <div className="flex justify-between mb-8">
           <div className="text-center">
-            <div className="text-white/80 text-sm">You</div>
-            <div className="text-2xl font-bold text-white">{getPlayerScore(currentAddress)}</div>
+            <div className="text-white/80 text-sm flex items-center justify-center gap-2">
+              You
+              {scoreAnimation === 'user' && (
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              )}
+            </div>
+            <div className={`text-2xl font-bold text-white transition-all duration-300 ${
+              scoreAnimation === 'user' ? 'scale-110 text-green-400' : ''
+            }`}>
+              {getPlayerScore(currentAddress)}
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-white/80 text-sm">Opponent</div>
-            <div className="text-2xl font-bold text-white">{getOpponentScore()}</div>
+            <div className="text-white/80 text-sm flex items-center justify-center gap-2">
+              Opponent
+              {scoreAnimation === 'opponent' && (
+                <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
+              )}
+            </div>
+            <div className={`text-2xl font-bold text-white transition-all duration-300 ${
+              scoreAnimation === 'opponent' ? 'scale-110 text-red-400' : ''
+            }`}>
+              {getOpponentScore()}
+            </div>
           </div>
         </div>
 

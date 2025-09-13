@@ -210,6 +210,24 @@ function handleStartGame(ws, message) {
   });
   
   console.log(`Game started in lobby ${lobbyId}`);
+  
+  // Start periodic score updates during the game
+  lobby.scoreUpdateInterval = setInterval(() => {
+    if (lobby.status === 'playing') {
+      const playerScores = lobby.players.map(pId => {
+        const player = players.get(pId);
+        return {
+          playerId: pId,
+          score: player ? player.score : 0
+        };
+      });
+      
+      broadcastToLobby(lobbyId, {
+        type: 'score_sync',
+        playerScores
+      });
+    }
+  }, 2000); // Update every 2 seconds
 }
 
 function handleSubmitAnswer(ws, message) {
@@ -254,8 +272,17 @@ function handleSubmitAnswer(ws, message) {
     type: 'answer_submitted',
     playerId,
     questionId,
+    answer: parseInt(answer),
     isCorrect,
     score: player.score
+  });
+  
+  // Send real-time score update
+  broadcastToLobby(lobbyId, {
+    type: 'score_update',
+    playerId,
+    score: player.score,
+    isCorrect
   });
   
   // Check if all questions answered
@@ -283,6 +310,12 @@ function handleSubmitAnswer(ws, message) {
     });
     
     lobby.status = 'finished';
+    
+    // Clear the score update interval
+    if (lobby.scoreUpdateInterval) {
+      clearInterval(lobby.scoreUpdateInterval);
+      lobby.scoreUpdateInterval = null;
+    }
   }
 }
 
