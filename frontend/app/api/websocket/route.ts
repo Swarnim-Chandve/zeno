@@ -176,29 +176,86 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Need exactly 2 players to start' }, { status: 400 })
     }
     
-    // Generate questions
+    // Generate better math questions with varying difficulty
     const questions = []
+    const difficultyLevels = ['very_easy', 'easy', 'medium']
+    
     for (let i = 0; i < 5; i++) {
-      const a = Math.floor(Math.random() * 20) + 1
-      const b = Math.floor(Math.random() * 20) + 1
-      const operation = Math.random() > 0.5 ? '+' : '-'
+      const difficulty = difficultyLevels[Math.floor(Math.random() * difficultyLevels.length)]
       let question, answer
       
-      if (operation === '+') {
-        question = `${a} + ${b}`
-        answer = a + b
-      } else {
-        const larger = Math.max(a, b)
-        const smaller = Math.min(a, b)
-        question = `${larger} - ${smaller}`
-        answer = larger - smaller
+      switch (difficulty) {
+        case 'very_easy':
+          // Single digit addition/subtraction
+          const a1 = Math.floor(Math.random() * 9) + 1
+          const b1 = Math.floor(Math.random() * 9) + 1
+          if (Math.random() > 0.5) {
+            question = `${a1} + ${b1}`
+            answer = a1 + b1
+          } else {
+            const larger1 = Math.max(a1, b1)
+            const smaller1 = Math.min(a1, b1)
+            question = `${larger1} - ${smaller1}`
+            answer = larger1 - smaller1
+          }
+          break
+          
+        case 'easy':
+          // Double digit addition/subtraction or simple multiplication
+          const operation = Math.random()
+          if (operation < 0.4) {
+            // Addition
+            const a2 = Math.floor(Math.random() * 20) + 1
+            const b2 = Math.floor(Math.random() * 20) + 1
+            question = `${a2} + ${b2}`
+            answer = a2 + b2
+          } else if (operation < 0.8) {
+            // Subtraction
+            const a3 = Math.floor(Math.random() * 30) + 10
+            const b3 = Math.floor(Math.random() * 20) + 1
+            question = `${a3} - ${b3}`
+            answer = a3 - b3
+          } else {
+            // Simple multiplication
+            const a4 = Math.floor(Math.random() * 9) + 1
+            const b4 = Math.floor(Math.random() * 9) + 1
+            question = `${a4} × ${b4}`
+            answer = a4 * b4
+          }
+          break
+          
+        case 'medium':
+          // More complex operations
+          const op = Math.random()
+          if (op < 0.3) {
+            // Double digit multiplication
+            const a5 = Math.floor(Math.random() * 9) + 1
+            const b5 = Math.floor(Math.random() * 9) + 1
+            question = `${a5} × ${b5}`
+            answer = a5 * b5
+          } else if (op < 0.6) {
+            // Division
+            const a6 = Math.floor(Math.random() * 8) + 2
+            const b6 = Math.floor(Math.random() * 8) + 2
+            const result = a6 * b6
+            question = `${result} ÷ ${a6}`
+            answer = b6
+          } else {
+            // Mixed operations
+            const a7 = Math.floor(Math.random() * 15) + 5
+            const b7 = Math.floor(Math.random() * 15) + 5
+            const c7 = Math.floor(Math.random() * 5) + 1
+            question = `${a7} + ${b7} - ${c7}`
+            answer = a7 + b7 - c7
+          }
+          break
       }
       
       questions.push({
         id: i,
         question,
         answer,
-        timeLimit: 30
+        timeLimit: 20 // Reduced time for speed
       })
     }
     

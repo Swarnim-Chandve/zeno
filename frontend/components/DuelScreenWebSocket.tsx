@@ -50,6 +50,8 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
   const [isCorrect, setIsCorrect] = useState(false)
   const [wsConnected, setWsConnected] = useState(false)
   const [scoreAnimation, setScoreAnimation] = useState<'user' | 'opponent' | null>(null)
+  const [inputStatus, setInputStatus] = useState<'neutral' | 'correct' | 'incorrect'>('neutral')
+  const [autoSubmitTimer, setAutoSubmitTimer] = useState<NodeJS.Timeout | null>(null)
   
   const wsRef = useRef<WebSocket | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -85,15 +87,84 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
               { id: 'opponent', address: 'opponent', score: 0, answers: [] }
             ])
           } else {
-            // Fallback to mock questions if API fails
-            const mockQuestions = [
-              { id: 0, question: "5 + 3", answer: 8, timeLimit: 30 },
-              { id: 1, question: "12 - 7", answer: 5, timeLimit: 30 },
-              { id: 2, question: "4 × 6", answer: 24, timeLimit: 30 },
-              { id: 3, question: "18 ÷ 2", answer: 9, timeLimit: 30 },
-              { id: 4, question: "9 + 11", answer: 20, timeLimit: 30 }
-            ]
-            setQuestions(mockQuestions)
+            // Generate real-time questions if API fails
+            const generateQuestions = () => {
+              const questions = []
+              const difficultyLevels = ['very_easy', 'easy', 'medium']
+              
+              for (let i = 0; i < 5; i++) {
+                const difficulty = difficultyLevels[Math.floor(Math.random() * difficultyLevels.length)]
+                let question, answer
+                
+                switch (difficulty) {
+                  case 'very_easy':
+                    const a1 = Math.floor(Math.random() * 9) + 1
+                    const b1 = Math.floor(Math.random() * 9) + 1
+                    if (Math.random() > 0.5) {
+                      question = `${a1} + ${b1}`
+                      answer = a1 + b1
+                    } else {
+                      const larger1 = Math.max(a1, b1)
+                      const smaller1 = Math.min(a1, b1)
+                      question = `${larger1} - ${smaller1}`
+                      answer = larger1 - smaller1
+                    }
+                    break
+                    
+                  case 'easy':
+                    const operation = Math.random()
+                    if (operation < 0.4) {
+                      const a2 = Math.floor(Math.random() * 20) + 1
+                      const b2 = Math.floor(Math.random() * 20) + 1
+                      question = `${a2} + ${b2}`
+                      answer = a2 + b2
+                    } else if (operation < 0.8) {
+                      const a3 = Math.floor(Math.random() * 30) + 10
+                      const b3 = Math.floor(Math.random() * 20) + 1
+                      question = `${a3} - ${b3}`
+                      answer = a3 - b3
+                    } else {
+                      const a4 = Math.floor(Math.random() * 9) + 1
+                      const b4 = Math.floor(Math.random() * 9) + 1
+                      question = `${a4} × ${b4}`
+                      answer = a4 * b4
+                    }
+                    break
+                    
+                  case 'medium':
+                    const op = Math.random()
+                    if (op < 0.3) {
+                      const a5 = Math.floor(Math.random() * 9) + 1
+                      const b5 = Math.floor(Math.random() * 9) + 1
+                      question = `${a5} × ${b5}`
+                      answer = a5 * b5
+                    } else if (op < 0.6) {
+                      const a6 = Math.floor(Math.random() * 8) + 2
+                      const b6 = Math.floor(Math.random() * 8) + 2
+                      const result = a6 * b6
+                      question = `${result} ÷ ${a6}`
+                      answer = b6
+                    } else {
+                      const a7 = Math.floor(Math.random() * 15) + 5
+                      const b7 = Math.floor(Math.random() * 15) + 5
+                      const c7 = Math.floor(Math.random() * 5) + 1
+                      question = `${a7} + ${b7} - ${c7}`
+                      answer = a7 + b7 - c7
+                    }
+                    break
+                }
+                
+                questions.push({
+                  id: i,
+                  question: question || '',
+                  answer: answer || 0,
+                  timeLimit: 20
+                })
+              }
+              return questions
+            }
+            
+            setQuestions(generateQuestions())
             setPlayers([
               { id: currentAddress, address: currentAddress, score: 0, answers: [] },
               { id: 'opponent', address: 'opponent', score: 0, answers: [] }
@@ -101,15 +172,84 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
           }
         } catch (error) {
           console.error('Error starting game:', error)
-          // Fallback to mock questions
-          const mockQuestions = [
-            { id: 0, question: "5 + 3", answer: 8, timeLimit: 30 },
-            { id: 1, question: "12 - 7", answer: 5, timeLimit: 30 },
-            { id: 2, question: "4 × 6", answer: 24, timeLimit: 30 },
-            { id: 3, question: "18 ÷ 2", answer: 9, timeLimit: 30 },
-            { id: 4, question: "9 + 11", answer: 20, timeLimit: 30 }
-          ]
-          setQuestions(mockQuestions)
+          // Generate real-time questions as fallback
+          const generateQuestions = () => {
+            const questions = []
+            const difficultyLevels = ['very_easy', 'easy', 'medium']
+            
+            for (let i = 0; i < 5; i++) {
+              const difficulty = difficultyLevels[Math.floor(Math.random() * difficultyLevels.length)]
+              let question, answer
+              
+              switch (difficulty) {
+                case 'very_easy':
+                  const a1 = Math.floor(Math.random() * 9) + 1
+                  const b1 = Math.floor(Math.random() * 9) + 1
+                  if (Math.random() > 0.5) {
+                    question = `${a1} + ${b1}`
+                    answer = a1 + b1
+                  } else {
+                    const larger1 = Math.max(a1, b1)
+                    const smaller1 = Math.min(a1, b1)
+                    question = `${larger1} - ${smaller1}`
+                    answer = larger1 - smaller1
+                  }
+                  break
+                  
+                case 'easy':
+                  const operation = Math.random()
+                  if (operation < 0.4) {
+                    const a2 = Math.floor(Math.random() * 20) + 1
+                    const b2 = Math.floor(Math.random() * 20) + 1
+                    question = `${a2} + ${b2}`
+                    answer = a2 + b2
+                  } else if (operation < 0.8) {
+                    const a3 = Math.floor(Math.random() * 30) + 10
+                    const b3 = Math.floor(Math.random() * 20) + 1
+                    question = `${a3} - ${b3}`
+                    answer = a3 - b3
+                  } else {
+                    const a4 = Math.floor(Math.random() * 9) + 1
+                    const b4 = Math.floor(Math.random() * 9) + 1
+                    question = `${a4} × ${b4}`
+                    answer = a4 * b4
+                  }
+                  break
+                  
+                case 'medium':
+                  const op = Math.random()
+                  if (op < 0.3) {
+                    const a5 = Math.floor(Math.random() * 9) + 1
+                    const b5 = Math.floor(Math.random() * 9) + 1
+                    question = `${a5} × ${b5}`
+                    answer = a5 * b5
+                  } else if (op < 0.6) {
+                    const a6 = Math.floor(Math.random() * 8) + 2
+                    const b6 = Math.floor(Math.random() * 8) + 2
+                    const result = a6 * b6
+                    question = `${result} ÷ ${a6}`
+                    answer = b6
+                  } else {
+                    const a7 = Math.floor(Math.random() * 15) + 5
+                    const b7 = Math.floor(Math.random() * 15) + 5
+                    const c7 = Math.floor(Math.random() * 5) + 1
+                    question = `${a7} + ${b7} - ${c7}`
+                    answer = a7 + b7 - c7
+                  }
+                  break
+              }
+              
+              questions.push({
+                id: i,
+                question: question || '',
+                answer: answer || 0,
+                timeLimit: 20
+              })
+            }
+            return questions
+          }
+          
+          setQuestions(generateQuestions())
           setPlayers([
             { id: currentAddress, address: currentAddress, score: 0, answers: [] },
             { id: 'opponent', address: 'opponent', score: 0, answers: [] }
@@ -122,7 +262,7 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     }
     
     try {
-      const ws = new WebSocket(wsUrl)
+      const ws = new WebSocket(wsUrl!)
       wsRef.current = ws
 
       ws.onopen = () => {
@@ -250,6 +390,9 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
       if (timerRef.current) {
         clearInterval(timerRef.current)
       }
+      if (autoSubmitTimer) {
+        clearTimeout(autoSubmitTimer)
+      }
     }
   }, [currentAddress, match.matchId])
 
@@ -257,7 +400,7 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
   useEffect(() => {
     if (gameStatus !== 'playing' || currentQuestionIndex >= questions.length) return
 
-    setTimeLeft(questions[currentQuestionIndex]?.timeLimit || 30)
+    setTimeLeft(questions[currentQuestionIndex]?.timeLimit || 20)
     
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
@@ -326,16 +469,52 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
       }))
     }
 
-    // Move to next question after 2 seconds
+    // Move to next question after 1 second for speed
     setTimeout(() => {
       setShowResult(false)
+      setInputStatus('neutral')
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1)
         setUserAnswer('')
       } else {
         setGameStatus('finished')
       }
-    }, 2000)
+    }, 1000)
+  }
+
+  // Real-time input validation
+  const handleInputChange = (value: string) => {
+    setUserAnswer(value)
+    
+    if (!value.trim()) {
+      setInputStatus('neutral')
+      return
+    }
+
+    const question = questions[currentQuestionIndex]
+    if (!question) return
+
+    const answerNum = parseInt(value) || 0
+    const correct = answerNum === question.answer
+
+    if (correct) {
+      setInputStatus('correct')
+      // Auto-submit correct answer after a short delay
+      if (autoSubmitTimer) {
+        clearTimeout(autoSubmitTimer)
+      }
+      const timer = setTimeout(() => {
+        handleSubmitAnswer(value)
+      }, 500) // Auto-submit after 500ms
+      setAutoSubmitTimer(timer)
+    } else {
+      setInputStatus('incorrect')
+      // Clear any existing timer
+      if (autoSubmitTimer) {
+        clearTimeout(autoSubmitTimer)
+        setAutoSubmitTimer(null)
+      }
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -552,13 +731,31 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
             <input
               type="number"
               value={userAnswer}
-              onChange={(e) => setUserAnswer(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Your answer"
-              className="w-full px-6 py-4 text-2xl text-center bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Type your answer..."
+              className={`w-full px-6 py-4 text-2xl text-center rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 transition-all duration-300 ${
+                inputStatus === 'correct' 
+                  ? 'bg-green-500/30 border-2 border-green-400 focus:ring-green-400' 
+                  : inputStatus === 'incorrect'
+                  ? 'bg-red-500/30 border-2 border-red-400 focus:ring-red-400'
+                  : 'bg-white/20 border border-white/30 focus:ring-blue-500'
+              }`}
               disabled={showResult}
               autoFocus
             />
+            
+            {/* Real-time feedback */}
+            {inputStatus === 'correct' && (
+              <div className="mt-2 text-green-400 font-bold text-lg animate-pulse">
+                ✓ Correct! Auto-submitting...
+              </div>
+            )}
+            {inputStatus === 'incorrect' && userAnswer && (
+              <div className="mt-2 text-red-400 font-bold text-lg">
+                ✗ Try again
+              </div>
+            )}
           </div>
         </div>
 
