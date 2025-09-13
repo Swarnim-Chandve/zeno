@@ -19,7 +19,10 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    setIsClient(true)
+    // Ensure we're on the client side
+    if (typeof window !== 'undefined') {
+      setIsClient(true)
+    }
   }, [])
 
   const handleMatchFound = (match: any) => {

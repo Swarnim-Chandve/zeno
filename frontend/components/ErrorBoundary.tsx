@@ -24,6 +24,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo)
+    
+    // Handle specific React errors
+    if (error.message.includes('Minified React error #310')) {
+      console.error('React error #310: useEffect called during render. This is likely due to wallet injection issues.')
+    }
   }
 
   resetError = () => {
