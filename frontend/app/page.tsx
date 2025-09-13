@@ -1,29 +1,25 @@
 'use client'
 
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Wallet, Play, Trophy, Users } from 'lucide-react'
 import { MatchmakingWebSocket } from '@/components/MatchmakingWebSocket'
 import { DuelScreenWebSocket } from '@/components/DuelScreenWebSocket'
 import { Results } from '@/components/Results'
 import { Leaderboard } from '@/components/Leaderboard'
+import { WalletWrapper } from '@/components/WalletWrapper'
 
-export default function Home() {
-  const { address, isConnected } = useAccount()
-  const { connect, connectors } = useConnect()
-  const { disconnect } = useDisconnect()
+function HomeContent({ address, isConnected, connect, connectors, disconnect, isClient }: {
+  address: string | undefined
+  isConnected: boolean
+  connect: any
+  connectors: readonly any[]
+  disconnect: any
+  isClient: boolean
+}) {
   const [currentView, setCurrentView] = useState<'home' | 'matchmaking' | 'duel' | 'results'>('home')
   const [isDemoMode, setIsDemoMode] = useState(false)
   const [matchData, setMatchData] = useState<any>(null)
   const [duelData, setDuelData] = useState<any>(null)
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    // Ensure we're on the client side
-    if (typeof window !== 'undefined') {
-      setIsClient(true)
-    }
-  }, [])
 
   const handleMatchFound = (match: any) => {
     setMatchData(match)
@@ -215,5 +211,13 @@ export default function Home() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <WalletWrapper>
+      {(walletProps) => <HomeContent {...walletProps} />}
+    </WalletWrapper>
   )
 }
