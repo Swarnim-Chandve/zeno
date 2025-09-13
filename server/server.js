@@ -17,6 +17,8 @@ app.use(express.json());
 const matches = new Map(); // matchId -> match data
 const players = new Map(); // playerAddress -> matchId
 const websockets = new Map(); // playerAddress -> WebSocket
+const matchmakingQueue = new Map(); // playerAddress -> { joinedAt, ws }
+const waitingPlayers = new Map(); // playerAddress -> player data
 
 // Contract configuration
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || "0x..."; // Will be set after deployment
@@ -88,6 +90,23 @@ function generateMathQuestion() {
   };
 }
 
+// Helper function to broadcast to matchmaking queue
+function broadcastMatchmakingUpdate() {
+  const queuePlayers = Array.from(matchmakingQueue.entries()).map(([address, data]) => ({
+    address,
+    joinedAt: data.joinedAt
+  }));
+  
+  matchmakingQueue.forEach((data) => {
+    if (data.ws && data.ws.readyState === WebSocket.OPEN) {
+      data.ws.send(JSON.stringify({
+        type: 'matchmaking_update',
+        waitingPlayers: queuePlayers
+      }));
+    }
+  });
+}
+
 // REST API Routes
 app.post('/match', (req, res) => {
   const { playerAddress } = req.body;
@@ -121,11 +140,37 @@ app.post('/match', (req, res) => {
       status: 'waiting',
       createdAt: Date.now()
     });
+    
+    // Add to matchmaking queue
+    matchmakingQueue.set(playerAddress, {
+      joinedAt: Date.now(),
+      ws: null // Will be set when WebSocket connects
+    });
+    
+    // Broadcast update to all waiting players
+    broadcastMatchmakingUpdate();
   } else {
     // Join existing match
     const match = matches.get(matchId);
     match.players.push(playerAddress);
     match.status = 'ready';
+    
+    // Remove both players from matchmaking queue
+    match.players.forEach(addr => {
+      matchmakingQueue.delete(addr);
+    });
+    
+    // Notify both players
+    match.players.forEach(playerAddr => {
+      const playerWs = websockets.get(playerAddr);
+      if (playerWs) {
+        playerWs.send(JSON.stringify({
+          type: 'opponent_joined',
+          matchId,
+          players: match.players
+        }));
+      }
+    });
   }
   
   players.set(playerAddress, matchId);
@@ -163,6 +208,26 @@ wss.on('connection', (ws, req) => {
           ws.send(JSON.stringify({ type: 'joined', playerAddress }));
           break;
           
+        case 'join_matchmaking':
+          websockets.set(playerAddress, ws);
+          
+          // Update matchmaking queue with WebSocket reference
+          if (matchmakingQueue.has(playerAddress)) {
+            matchmakingQueue.get(playerAddress).ws = ws;
+          }
+          
+          // Send current matchmaking status
+          const queuePlayers = Array.from(matchmakingQueue.entries()).map(([addr, data]) => ({
+            address: addr,
+            joinedAt: data.joinedAt
+          }));
+          
+          ws.send(JSON.stringify({
+            type: 'matchmaking_update',
+            waitingPlayers: queuePlayers
+          }));
+          break;
+          
         case 'start_duel':
           const match = matches.get(matchId);
           if (match && match.status === 'ready') {
@@ -197,6 +262,21 @@ wss.on('connection', (ws, req) => {
               questionId,
               answer,
               timestamp: Date.now()
+            });
+            
+            // Broadcast opponent's progress to other players
+            currentMatch.players.forEach(opponentAddr => {
+              if (opponentAddr !== playerAddress) {
+                const opponentWs = websockets.get(opponentAddr);
+                if (opponentWs) {
+                  opponentWs.send(JSON.stringify({
+                    type: 'opponent_answer',
+                    playerAddress,
+                    answer,
+                    currentQuestion: message.currentQuestion || 0
+                  }));
+                }
+              }
             });
             
             // Check if both players have answered all questions

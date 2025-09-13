@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAccount } from 'wagmi'
-import { Loader2, Users, X } from 'lucide-react'
+import { Loader2, Users, X, Clock, User } from 'lucide-react'
 
 interface MatchmakingProps {
   onMatchFound: (match: any) => void
@@ -11,15 +11,54 @@ interface MatchmakingProps {
   playerAddress?: string
 }
 
+interface WaitingPlayer {
+  address: string
+  joinedAt: number
+}
+
 export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAddress }: MatchmakingProps) {
   const { address } = useAccount()
-  const [status, setStatus] = useState<'searching' | 'found' | 'error'>('searching')
+  const [status, setStatus] = useState<'searching' | 'found' | 'error' | 'waiting'>('searching')
   const [matchId, setMatchId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [waitingPlayers, setWaitingPlayers] = useState<WaitingPlayer[]>([])
+  const [ws, setWs] = useState<WebSocket | null>(null)
+  const wsRef = useRef<WebSocket | null>(null)
 
   useEffect(() => {
     const currentAddress = isDemoMode ? playerAddress : address
     if (!currentAddress) return
+
+    // Connect to WebSocket for real-time updates
+    const websocket = new WebSocket('ws://localhost:3001')
+    websocket.onopen = () => {
+      websocket.send(JSON.stringify({
+        type: 'join_matchmaking',
+        playerAddress: currentAddress
+      }))
+    }
+
+    websocket.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      
+      if (data.type === 'matchmaking_update') {
+        setWaitingPlayers(data.waitingPlayers || [])
+        setStatus('waiting')
+      } else if (data.type === 'match_found') {
+        setStatus('found')
+        onMatchFound({ ...data, playerAddress: currentAddress })
+      } else if (data.type === 'opponent_joined') {
+        setStatus('found')
+        onMatchFound({ ...data, playerAddress: currentAddress })
+      }
+    }
+
+    websocket.onclose = () => {
+      console.log('WebSocket connection closed')
+    }
+
+    wsRef.current = websocket
+    setWs(websocket)
 
     const findMatch = async () => {
       try {
@@ -42,7 +81,7 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
           setStatus('found')
           onMatchFound({ ...data, playerAddress: currentAddress })
         } else {
-          setStatus('searching')
+          setStatus('waiting')
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
@@ -51,6 +90,10 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
     }
 
     findMatch()
+
+    return () => {
+      websocket.close()
+    }
   }, [address, onMatchFound, isDemoMode, playerAddress])
 
   if (status === 'error') {
@@ -85,15 +128,21 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-avalanche-50 to-avalanche-100 flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4">
         <div className="text-center">
           <div className="mx-auto w-16 h-16 bg-avalanche-100 rounded-full flex items-center justify-center mb-6">
             <Users className="w-8 h-8 text-avalanche-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Finding Opponent</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {status === 'searching' ? 'Finding Opponent' : 
+             status === 'waiting' ? 'Waiting for Opponent' : 
+             'Match Found!'}
+          </h2>
           <p className="text-gray-600 mb-6">
             {status === 'searching' 
               ? 'Searching for an opponent...' 
+              : status === 'waiting'
+              ? 'You are in the matchmaking queue. Waiting for another player...'
               : 'Match found! Starting duel...'
             }
           </p>
@@ -101,10 +150,43 @@ export function Matchmaking({ onMatchFound, onBack, isDemoMode = false, playerAd
           <div className="flex justify-center mb-6">
             <Loader2 className="w-8 h-8 text-avalanche-500 animate-spin" />
           </div>
+
+          {/* Waiting Players List */}
+          {status === 'waiting' && waitingPlayers.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Players in Queue</h3>
+              <div className="space-y-2">
+                {waitingPlayers.map((player, index) => (
+                  <div key={player.address} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-8 h-8 bg-avalanche-500 rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-gray-900">
+                        {player.address.slice(0, 6)}...{player.address.slice(-4)}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Waiting {Math.floor((Date.now() - player.joinedAt) / 1000)}s
+                      </div>
+                    </div>
+                    <Clock className="w-4 h-4 text-gray-400" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 mb-4">
             Match ID: {matchId?.slice(0, 8)}...
           </div>
+
+          {/* Cancel Button */}
+          <button
+            onClick={onBack}
+            className="text-avalanche-600 hover:text-avalanche-700 font-medium"
+          >
+            Cancel Matchmaking
+          </button>
         </div>
       </div>
     </div>

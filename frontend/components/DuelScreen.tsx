@@ -10,6 +10,13 @@ interface Question {
   id: string
 }
 
+interface Player {
+  address: string
+  answers: number[]
+  currentQuestion: number
+  isSubmitted: boolean
+}
+
 interface DuelScreenProps {
   match: any
   onComplete: (results: any) => void
@@ -26,6 +33,8 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
   const [timeLeft, setTimeLeft] = useState(30)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [ws, setWs] = useState<WebSocket | null>(null)
+  const [players, setPlayers] = useState<Player[]>([])
+  const [opponentProgress, setOpponentProgress] = useState<number>(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -48,6 +57,23 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
         setQuestions(data.questions)
         setTimeLeft(30)
         startTimer()
+        
+        // Initialize players
+        const currentAddress = isDemoMode ? match.playerAddress : address
+        const opponentAddress = match.players.find((p: string) => p !== currentAddress)
+        setPlayers([
+          { address: currentAddress, answers: [], currentQuestion: 0, isSubmitted: false },
+          { address: opponentAddress, answers: [], currentQuestion: 0, isSubmitted: false }
+        ])
+      } else if (data.type === 'opponent_progress') {
+        setOpponentProgress(data.currentQuestion)
+      } else if (data.type === 'opponent_answer') {
+        // Update opponent's progress
+        setPlayers(prev => prev.map(player => 
+          player.address === data.playerAddress 
+            ? { ...player, answers: [...player.answers, data.answer], currentQuestion: data.currentQuestion }
+            : player
+        ))
       } else if (data.type === 'match_completed') {
         onComplete(data)
       }
@@ -103,8 +129,16 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
       playerAddress: currentAddress,
       matchId: match.matchId,
       answer: answer,
-      questionId: questions[currentQuestion]?.id
+      questionId: questions[currentQuestion]?.id,
+      currentQuestion: currentQuestion
     }))
+
+    // Update local player state
+    setPlayers(prev => prev.map(player => 
+      player.address === currentAddress 
+        ? { ...player, answers: newAnswers, currentQuestion: currentQuestion + 1, isSubmitted: true }
+        : player
+    ))
 
     // Move to next question or complete
     if (currentQuestion < questions.length - 1) {
@@ -166,6 +200,45 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
             </div>
           </div>
         </div>
+
+        {/* Players Progress */}
+        {players.length > 0 && (
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Players Progress</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {players.map((player, index) => {
+                  const isCurrentPlayer = player.address === (isDemoMode ? match.playerAddress : address)
+                  const progress = (player.currentQuestion / questions.length) * 100
+                  
+                  return (
+                    <div key={player.address} className={`p-4 rounded-lg ${isCurrentPlayer ? 'bg-avalanche-50 border-2 border-avalanche-500' : 'bg-gray-50 border-2 border-gray-200'}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`w-3 h-3 rounded-full ${isCurrentPlayer ? 'bg-avalanche-500' : 'bg-gray-400'}`}></div>
+                        <span className="font-medium text-sm">
+                          {isCurrentPlayer ? 'You' : 'Opponent'}
+                        </span>
+                        {isCurrentPlayer && <span className="text-xs text-avalanche-600">(You)</span>}
+                      </div>
+                      <div className="text-xs text-gray-600 mb-2">
+                        {player.address.slice(0, 6)}...{player.address.slice(-4)}
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-500 ${isCurrentPlayer ? 'bg-avalanche-500' : 'bg-gray-400'}`}
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {player.currentQuestion} / {questions.length} questions
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Question Card */}
         <div className="max-w-2xl mx-auto">
