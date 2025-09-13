@@ -39,7 +39,7 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
     // Use localhost for development, or your deployed WebSocket server
     const wsUrl = process.env.NODE_ENV === 'production' 
       ? 'wss://zeno-websocket-server.vercel.app' 
-      : 'ws://localhost:3002'
+      : 'ws://localhost:3004'
 
     console.log('Connecting to WebSocket:', wsUrl)
     

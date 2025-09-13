@@ -353,7 +353,7 @@ app.get('/api/online-players', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3004;
 server.listen(PORT, () => {
   console.log(`WebSocket server running on port ${PORT}`);
   console.log(`API available at http://localhost:${PORT}/api`);

@@ -60,7 +60,7 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
 
     const wsUrl = process.env.NODE_ENV === 'production' 
       ? 'wss://zeno-websocket-server.vercel.app' 
-      : 'ws://localhost:3002'
+      : 'ws://localhost:3004'
 
     console.log('Connecting to WebSocket for duel:', wsUrl)
     
