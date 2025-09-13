@@ -91,7 +91,7 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
               const opponentAnswers = data.answers[opponentAddress]
               setPlayers(prev => prev.map(player => 
                 player.address === opponentAddress 
-                  ? { ...player, answers: opponentAnswers.map(a => a.answer), currentQuestion: opponentAnswers.length }
+                  ? { ...player, answers: opponentAnswers.map((a: any) => a.answer), currentQuestion: opponentAnswers.length }
                   : player
               ))
             }
