@@ -41,12 +41,14 @@ export async function GET(request: NextRequest) {
       createdAt: Date.now()
     })
     
-    global.players.set(playerId, {
-      address: playerAddress,
-      lobbyId,
-      answers: [],
-      score: 0
-    })
+    if (global.players) {
+      global.players.set(playerId, {
+        address: playerAddress,
+        lobbyId,
+        answers: [],
+        score: 0
+      })
+    }
     
     return Response.json({
       type: 'lobby_created',
@@ -68,7 +70,7 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Lobby not found' }, { status: 404 })
     }
     
-    const lobby = global.lobbies.get(lobbyId)
+    const lobby = global.lobbies?.get(lobbyId)
     
     if (lobby.players.length >= 2) {
       return Response.json({ error: 'Lobby is full' }, { status: 400 })
@@ -80,12 +82,14 @@ export async function GET(request: NextRequest) {
     
     // Add player to lobby
     lobby.players.push(playerId)
-    global.players.set(playerId, {
-      address: playerAddress,
-      lobbyId,
-      answers: [],
-      score: 0
-    })
+    if (global.players) {
+      global.players.set(playerId, {
+        address: playerAddress,
+        lobbyId,
+        answers: [],
+        score: 0
+      })
+    }
     
     return Response.json({
       type: 'player_joined',
@@ -102,9 +106,9 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Lobby not found' }, { status: 404 })
     }
     
-    const lobby = global.lobbies.get(lobbyId)
+    const lobby = global.lobbies?.get(lobbyId)
     const playerScores = lobby.players.map((pId: string) => {
-      const player = global.players.get(pId)
+      const player = global.players?.get(pId)
       return {
         playerId: pId,
         score: player ? player.score : 0,
@@ -132,8 +136,8 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Invalid parameters' }, { status: 400 })
     }
     
-    const lobby = global.lobbies.get(lobbyId)
-    const player = global.players.get(playerId)
+    const lobby = global.lobbies?.get(lobbyId)
+    const player = global.players?.get(playerId)
     
     if (!player) {
       return Response.json({ error: 'Player not found' }, { status: 404 })
@@ -176,7 +180,7 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Lobby not found' }, { status: 404 })
     }
     
-    const lobby = global.lobbies.get(lobbyId)
+    const lobby = global.lobbies?.get(lobbyId)
     
     if (lobby.players.length !== 2) {
       return Response.json({ error: 'Need exactly 2 players to start' }, { status: 400 })
