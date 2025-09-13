@@ -1,7 +1,7 @@
 'use client'
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 interface WalletWrapperProps {
   children: (props: {
@@ -18,53 +18,28 @@ export function WalletWrapper({ children }: WalletWrapperProps) {
   const [isClient, setIsClient] = useState(false)
   const [isWalletReady, setIsWalletReady] = useState(false)
   
-  // Use useMemo to prevent unnecessary re-renders
-  const walletState = useMemo(() => {
-    if (!isClient || !isWalletReady) {
-      return {
-        address: undefined,
-        isConnected: false,
-        connect: null,
-        connectors: [],
-        disconnect: null,
-        isClient: false
-      }
-    }
-
-    try {
-      const account = useAccount()
-      const connect = useConnect()
-      const disconnect = useDisconnect()
-
-      return {
-        address: account.address,
-        isConnected: account.isConnected,
-        connect: connect.connect,
-        connectors: connect.connectors,
-        disconnect: disconnect.disconnect,
-        isClient: true
-      }
-    } catch (error) {
-      console.warn('Wallet hooks error:', error)
-      return {
-        address: undefined,
-        isConnected: false,
-        connect: null,
-        connectors: [],
-        disconnect: null,
-        isClient: true
-      }
-    }
-  }, [isClient, isWalletReady])
+  // Always call hooks at the top level - this is the correct way
+  const account = useAccount()
+  const connect = useConnect()
+  const disconnect = useDisconnect()
 
   useEffect(() => {
     // Ensure we're on the client side
     setIsClient(true)
     
-    // Add a small delay to ensure wallet injection is complete
-    const timer = setTimeout(() => {
-      setIsWalletReady(true)
-    }, 100)
+    // Wait for wallet injection to complete
+    const checkWalletReady = () => {
+      // Check if ethereum is available and stable
+      if (typeof window !== 'undefined' && window.ethereum) {
+        setIsWalletReady(true)
+      } else {
+        // Retry after a short delay
+        setTimeout(checkWalletReady, 100)
+      }
+    }
+    
+    // Start checking after a small delay
+    const timer = setTimeout(checkWalletReady, 100)
 
     return () => clearTimeout(timer)
   }, [])
@@ -79,6 +54,16 @@ export function WalletWrapper({ children }: WalletWrapperProps) {
         </div>
       </div>
     )
+  }
+
+  // Prepare wallet state
+  const walletState = {
+    address: account.address,
+    isConnected: account.isConnected,
+    connect: connect.connect,
+    connectors: connect.connectors,
+    disconnect: disconnect.disconnect,
+    isClient: true
   }
 
   return (
