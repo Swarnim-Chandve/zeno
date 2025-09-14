@@ -399,7 +399,7 @@ app.post('/set-contract', (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3005;
 server.listen(PORT, () => {
   console.log(`Math Duel Backend running on port ${PORT}`);
   console.log(`WebSocket server ready`);

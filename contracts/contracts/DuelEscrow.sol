@@ -12,6 +12,7 @@ contract DuelEscrow is Ownable, ReentrancyGuard {
         uint256 stakeAmount;
         bool isActive;
         bool isCompleted;
+        uint256 startTime;
     }
 
     mapping(uint256 => Duel) public duels;
@@ -40,7 +41,8 @@ contract DuelEscrow is Ownable, ReentrancyGuard {
             playerB: address(0),
             stakeAmount: stakeAmount,
             isActive: true,
-            isCompleted: false
+            isCompleted: false,
+            startTime: block.timestamp
         });
 
         // Transfer tokens to escrow
@@ -97,6 +99,7 @@ contract DuelEscrow is Ownable, ReentrancyGuard {
     function getDuelCount() external view returns (uint256) {
         return nextDuelId - 1;
     }
+
 
     // Emergency function to withdraw stuck funds (only owner)
     function emergencyWithdraw(address token, uint256 amount) external onlyOwner {

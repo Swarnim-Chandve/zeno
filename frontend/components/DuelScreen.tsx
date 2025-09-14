@@ -170,8 +170,6 @@ export function DuelScreen({ match, onComplete, onBack, isDemoMode = false }: Du
         setCurrentQuestion(prev => prev + 1)
         setUserAnswer('')
         setIsSubmitted(false)
-        setTimeLeft(30)
-        startTimer()
       }, 1000)
     }
   }

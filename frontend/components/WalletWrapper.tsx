@@ -27,10 +27,20 @@ export function WalletWrapper({ children }: WalletWrapperProps) {
     // Ensure we're on the client side
     setIsClient(true)
     
+    let retryCount = 0
+    const maxRetries = 50 // 5 seconds max wait time
+    
     // Wait for wallet injection to complete
     const checkWalletReady = () => {
+      retryCount++
+      
       // Check if ethereum is available and stable
       if (typeof window !== 'undefined' && window.ethereum) {
+        console.log('Wallet detected, proceeding with app')
+        setIsWalletReady(true)
+      } else if (retryCount >= maxRetries) {
+        // After max retries, proceed anyway (for demo mode or browsers without wallet)
+        console.log('No wallet detected after timeout, proceeding anyway (demo mode available)')
         setIsWalletReady(true)
       } else {
         // Retry after a short delay

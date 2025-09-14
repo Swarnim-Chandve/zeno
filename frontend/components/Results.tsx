@@ -23,12 +23,10 @@ export function Results({ results, onPlayAgain, isDemoMode = false }: ResultsPro
             }`}>
               <Trophy className={`w-10 h-10 ${isWinner ? 'text-yellow-500' : 'text-gray-400'}`} />
             </div>
-            <h1 className={`text-4xl font-bold mb-4 ${
-              isWinner ? 'text-yellow-600' : 'text-gray-600'
-            }`}>
+            <h1 className="text-4xl font-bold mb-4 text-gray-900">
               {isWinner ? 'You Won!' : 'You Lost'}
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-700">
               {isWinner 
                 ? 'Congratulations! You won the math duel!' 
                 : 'Better luck next time!'
@@ -59,12 +57,14 @@ export function Results({ results, onPlayAgain, isDemoMode = false }: ResultsPro
                   
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Score:</span>
-                      <span className="font-semibold">{scoreData.score.toFixed(2)}</span>
+                      <span className="text-gray-700">Score:</span>
+                      <span className="font-semibold text-gray-900">{scoreData.score || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Total Time:</span>
-                      <span className="font-semibold">{(scoreData.totalTime / 1000).toFixed(1)}s</span>
+                      <span className="text-gray-700">Total Time:</span>
+                      <span className="font-semibold text-gray-900">
+                        {scoreData.totalTime ? (scoreData.totalTime / 1000).toFixed(1) + 's' : 'N/A'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -77,8 +77,8 @@ export function Results({ results, onPlayAgain, isDemoMode = false }: ResultsPro
               <div className="space-y-3">
                 {questions.map((question: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span className="font-mono text-lg">{question.question}</span>
-                    <span className="text-gray-600">Answer: {question.answer}</span>
+                    <span className="font-mono text-lg text-gray-900">{question.question}</span>
+                    <span className="text-gray-700">Answer: {question.answer}</span>
                   </div>
                 ))}
               </div>
@@ -101,23 +101,30 @@ export function Results({ results, onPlayAgain, isDemoMode = false }: ResultsPro
             <div className="bg-white rounded-xl shadow-lg p-6 text-center">
               <Target className="w-8 h-8 text-avalanche-500 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">Accuracy</h3>
-              <p className="text-2xl font-bold text-avalanche-600">
-                {Object.values(scores).map((s: any) => s.score).reduce((a: number, b: number) => Math.max(a, b), 0).toFixed(1)}
+              <p className="text-2xl font-bold text-gray-900">
+                {(() => {
+                  const totalQuestions = questions.length
+                  const correctAnswers = Object.values(scores).reduce((total: number, s: any) => total + (s.score || 0), 0)
+                  return totalQuestions > 0 ? ((correctAnswers / (totalQuestions * 2)) * 100).toFixed(1) + '%' : '0%'
+                })()}
               </p>
             </div>
             
             <div className="bg-white rounded-xl shadow-lg p-6 text-center">
               <Clock className="w-8 h-8 text-avalanche-500 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">Speed</h3>
-              <p className="text-2xl font-bold text-avalanche-600">
-                {Object.values(scores).map((s: any) => s.totalTime).reduce((a: number, b: number) => Math.min(a, b), Infinity) / 1000}s
+              <p className="text-2xl font-bold text-gray-900">
+                {(() => {
+                  const totalTime = Object.values(scores).reduce((total: number, s: any) => total + (s.totalTime || 0), 0)
+                  return totalTime > 0 ? (totalTime / 1000).toFixed(0) + 's' : 'N/A'
+                })()}
               </p>
             </div>
             
             <div className="bg-white rounded-xl shadow-lg p-6 text-center">
               <Trophy className="w-8 h-8 text-avalanche-500 mx-auto mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">Winner</h3>
-              <p className="text-lg font-bold text-avalanche-600">
+              <p className="text-lg font-bold text-gray-900">
                 {isWinner ? 'You' : 'Opponent'}
               </p>
             </div>

@@ -17,17 +17,78 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
+  color: #000000 !important;
   background: linear-gradient(
       to bottom,
       transparent,
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Force all text to be black */
+* {
+  color: #000000 !important;
+}
+
+/* Override specific text colors that might be set by components */
+.text-gray-600,
+.text-gray-500,
+.text-gray-700,
+.text-avalanche-600,
+.text-green-600,
+.text-blue-600,
+.text-red-600 {
+  color: #000000 !important;
+}
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-avalanche-500 hover:bg-avalanche-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-avalanche-500 focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  }
+  
+  .btn-success {
+    @apply bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-xl p-8;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avalanche-500 focus:border-transparent transition-colors duration-200;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  .gradient-avalanche {
+    @apply bg-gradient-to-br from-avalanche-50 to-avalanche-100;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-avalanche-600 to-avalanche-800 bg-clip-text text-transparent;
   }
 }

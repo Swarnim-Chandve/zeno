@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useAccount } from 'wagmi'
-import { ArrowLeft, Clock, Trophy, Zap, CheckCircle, XCircle } from 'lucide-react'
+import { useAccount, useWriteContract, useReadContract } from 'wagmi'
+import { ArrowLeft, Clock, Trophy, Zap, CheckCircle, XCircle, Coins } from 'lucide-react'
+import { parseUnits, formatUnits } from 'viem'
 
 interface DuelScreenProps {
   match: {
@@ -10,10 +11,56 @@ interface DuelScreenProps {
     status: string
     players: string[]
     playerAddress: string
+    duelId?: number
+    stakeAmount?: string
+    stakeToken?: 'AVAX' | 'USDC'
   }
   onBack: () => void
   isDemoMode?: boolean
 }
+
+// Contract configuration - AVAX Duel Escrow
+const AVAX_CONTRACT_ADDRESS = "0x16F974aaeEa37A5422dF642934E7189E261C67B8" as `0x${string}`
+const USDC_CONTRACT_ADDRESS = "0x59a564EFAC88524a5358a2aCD298Ed82c91c1642" as `0x${string}`
+const USDC_TOKEN_ADDRESS = "0x356333ea7c55A4618d26ea355FBa93801A0A3A15" as `0x${string}`
+const AVAX_DECIMALS = 18
+const USDC_DECIMALS = 6
+
+// Contract ABI for AVAX Duel Escrow
+const AVAX_CONTRACT_ABI = [
+  {
+    "inputs": [{"name": "duelId", "type": "uint256"}, {"name": "winner", "type": "address"}],
+    "name": "finalizeDuel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{"name": "duelId", "type": "uint256"}],
+    "name": "getDuel",
+    "outputs": [{"components": [{"name": "playerA", "type": "address"}, {"name": "playerB", "type": "address"}, {"name": "stakeAmount", "type": "uint256"}, {"name": "isActive", "type": "bool"}, {"name": "isCompleted", "type": "bool"}, {"name": "startTime", "type": "uint256"}], "name": "", "type": "tuple"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const
+
+// Contract ABI for USDC Duel Escrow
+const USDC_CONTRACT_ABI = [
+  {
+    "inputs": [{"name": "duelId", "type": "uint256"}, {"name": "winner", "type": "address"}],
+    "name": "finalizeDuel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{"name": "duelId", "type": "uint256"}],
+    "name": "getDuel",
+    "outputs": [{"components": [{"name": "playerA", "type": "address"}, {"name": "playerB", "type": "address"}, {"name": "stakeAmount", "type": "uint256"}, {"name": "isActive", "type": "bool"}, {"name": "isCompleted", "type": "bool"}], "name": "", "type": "tuple"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const
 
 interface Question {
   id: number
@@ -41,7 +88,7 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [userAnswer, setUserAnswer] = useState('')
-  const [timeLeft, setTimeLeft] = useState(30)
+  const [timeLeft, setTimeLeft] = useState(30) // Total game time: 30 seconds
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting')
   const [players, setPlayers] = useState<Player[]>([])
   const [opponentAnswers, setOpponentAnswers] = useState<PlayerAnswer[]>([])
@@ -52,10 +99,18 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
   const [scoreAnimation, setScoreAnimation] = useState<'user' | 'opponent' | null>(null)
   const [inputStatus, setInputStatus] = useState<'neutral' | 'correct' | 'incorrect'>('neutral')
   const [autoSubmitTimer, setAutoSubmitTimer] = useState<NodeJS.Timeout | null>(null)
+  const [isClaiming, setIsClaiming] = useState(false)
+  const [claimSuccess, setClaimSuccess] = useState(false)
+  const [poolAmount, setPoolAmount] = useState('0')
+  const [duelId, setDuelId] = useState<number | null>(match.duelId || null)
+  const [stakeToken, setStakeToken] = useState<'AVAX' | 'USDC'>(match.stakeToken || 'AVAX')
   
   const wsRef = useRef<WebSocket | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const currentAddress = isDemoMode ? match.playerAddress : address
+
+  // Contract interactions
+  const { writeContract: writeContract } = useWriteContract()
 
   // WebSocket/API connection
   useEffect(() => {
@@ -169,6 +224,8 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
               { id: currentAddress, address: currentAddress, score: 0, answers: [] },
               { id: 'opponent', address: 'opponent', score: 0, answers: [] }
             ])
+            setGameStatus('playing')
+            // DON'T reset timer - let it continue from where it was
           }
         } catch (error) {
           console.error('Error starting game:', error)
@@ -254,6 +311,8 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
             { id: currentAddress, address: currentAddress, score: 0, answers: [] },
             { id: 'opponent', address: 'opponent', score: 0, answers: [] }
           ])
+          setGameStatus('playing')
+          // DON'T reset timer - let it continue from where it was
         }
       }
       
@@ -296,12 +355,16 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
             case 'game_started':
               setQuestions(message.questions)
               setGameStatus('playing')
-              setTimeLeft(30)
+              // Extract duelId if provided
+              if (message.duelId) {
+                setDuelId(message.duelId)
+              }
+              // Don't reset timer - it should continue from where it was
               break
               
             case 'answer_submitted':
               // Update opponent's answer
-              if (message.playerId !== currentAddress) {
+              if (message.playerAddress !== currentAddress) {
                 setOpponentAnswers(prev => [...prev, {
                   questionId: message.questionId,
                   answer: message.answer,
@@ -309,23 +372,50 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
                   timestamp: Date.now()
                 }])
                 
-                // Update opponent's score in real-time
+                // Update opponent's score in real-time with animation
                 setPlayers(prev => prev.map(p => 
-                  p.address === message.playerId 
+                  p.address === message.playerAddress 
                     ? { ...p, score: message.score || p.score }
                     : p
                 ))
+                
+                // Trigger score animation for opponent
+                if (message.isCorrect) {
+                  setScoreAnimation('opponent')
+                  setTimeout(() => setScoreAnimation(null), 500)
+                }
               }
               break
               
             case 'game_finished':
               setGameStatus('finished')
-              setPlayers(message.results.map((r: any) => ({
+              const gameResults = message.results.map((r: any) => ({
                 id: r.playerId,
-                address: r.playerId,
+                address: r.playerAddress,
                 score: r.score,
                 answers: r.answers
-              })))
+              }))
+              console.log('Game finished - Results:', gameResults)
+              console.log('Current address:', currentAddress)
+              
+              // Remove duplicates based on address to ensure we only have unique players
+              const uniqueResults = gameResults.filter((player: any, index: number, self: any[]) => 
+                index === self.findIndex((p: any) => p.address === player.address)
+              )
+              console.log('Unique results:', uniqueResults)
+              setPlayers(uniqueResults)
+              // Store winner/loser info for display
+              if (message.winner) {
+                console.log(`Winner: ${message.winner} (${message.winnerScore} points)`)
+                console.log(`Loser: ${message.loser} (${message.loserScore} points)`)
+              } else if (message.isTie) {
+                console.log(`Game ended in a tie! Both players scored ${message.winnerScore} points`)
+              }
+              
+              // Calculate pool amount for claiming (combined stake from both players)
+              const stakeAmount = match.stakeAmount || '0.01'
+              const totalPool = (parseFloat(stakeAmount) * 2).toFixed(3)
+              setPoolAmount(totalPool)
               break
               
             case 'lobby_status':
@@ -339,28 +429,39 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
               
             case 'score_update':
               // Real-time score update for any player
-              setPlayers(prev => prev.map(p => 
-                p.address === message.playerId 
-                  ? { ...p, score: message.score }
-                  : p
-              ))
+              console.log(`Score update received: ${message.playerAddress} scored ${message.score}`)
+              setPlayers(prev => prev.map(p => {
+                if (p.address === message.playerAddress) {
+                  console.log(`Updating score for ${p.address}: ${p.score} -> ${message.score}`)
+                  return { ...p, score: message.score }
+                }
+                return p
+              }))
               
-              // Trigger score animation
-              if (message.playerId === currentAddress) {
+              // Trigger score animation with enhanced visual feedback
+              if (message.playerAddress === currentAddress) {
                 setScoreAnimation('user')
               } else {
                 setScoreAnimation('opponent')
               }
               
               // Clear animation after a short delay
-              setTimeout(() => setScoreAnimation(null), 1000)
+              setTimeout(() => setScoreAnimation(null), 600) // Slightly longer for better visibility
               break
               
             case 'score_sync':
               // Periodic score synchronization
+              console.log('Score sync received:', message.playerScores)
               setPlayers(prev => prev.map(p => {
-                const updatedPlayer = message.playerScores.find((ps: any) => ps.playerId === p.address);
-                return updatedPlayer ? { ...p, score: updatedPlayer.score } : p;
+                const updatedPlayer = message.playerScores.find((ps: any) => {
+                  // Try to match by playerId first, then by address
+                  return ps.playerId === p.address || ps.playerAddress === p.address;
+                });
+                if (updatedPlayer) {
+                  console.log(`Syncing score for ${p.address}: ${p.score} -> ${updatedPlayer.score}`)
+                  return { ...p, score: updatedPlayer.score }
+                }
+                return p;
               }))
               break
           }
@@ -396,17 +497,26 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     }
   }, [currentAddress, match.matchId])
 
-  // Timer for each question
+  // Global game timer - 30 seconds total for both players
   useEffect(() => {
-    if (gameStatus !== 'playing' || currentQuestionIndex >= questions.length) return
+    if (gameStatus !== 'playing') {
+      // Clear timer when not playing
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+      return
+    }
 
-    setTimeLeft(questions[currentQuestionIndex]?.timeLimit || 20)
-    
+    // Only start timer if not already running
+    if (timerRef.current) return
+
+    // Start timer only once when game starts
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          // Time's up - auto-submit empty answer
-          handleSubmitAnswer('')
+          // Game time's up - finish the game
+          setGameStatus('finished')
           return 0
         }
         return prev - 1
@@ -416,9 +526,10 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current)
+        timerRef.current = null
       }
     }
-  }, [gameStatus, currentQuestionIndex, questions])
+  }, [gameStatus])
 
   const handleSubmitAnswer = (answer: string) => {
     if (currentQuestionIndex >= questions.length) return
@@ -438,38 +549,55 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     setIsCorrect(correct)
     setShowResult(true)
 
-    // Update player score immediately
+    // Update player score immediately with animation
     if (correct) {
       setPlayers(prev => prev.map(p => 
         p.address === currentAddress 
           ? { ...p, score: p.score + 1 }
           : p
       ))
+      
+      // Trigger score animation for user
+      setScoreAnimation('user')
+      setTimeout(() => setScoreAnimation(null), 500)
     }
 
-    // Send answer to server
+    // Send answer to server with enhanced data
+    const answerPayload = {
+      type: 'submit_answer',
+      playerId: currentAddress,
+      playerAddress: currentAddress,
+      questionId: question.id,
+      answer: answerNum,
+      isCorrect: correct,
+      lobbyId: match.matchId,
+      timestamp: Date.now()
+    }
+
     if (process.env.NODE_ENV === 'production') {
       // Use API in production
-      fetch(`/api/websocket?action=submit-answer&playerId=${currentAddress}&questionId=${question.id}&answer=${answerNum}&lobbyId=${match.matchId}`)
+      fetch(`/api/websocket?action=submit-answer&playerId=${currentAddress}&questionId=${question.id}&answer=${answerNum}&isCorrect=${correct}&lobbyId=${match.matchId}`)
         .then(response => response.json())
         .then(data => {
           console.log('Answer submitted via API:', data)
+          // Trigger real-time score update for both players
+          if (data.scoreUpdate) {
+            setPlayers(prev => prev.map(p => 
+              p.address === data.playerAddress 
+                ? { ...p, score: data.score }
+                : p
+            ))
+          }
         })
         .catch(error => {
           console.error('Error submitting answer:', error)
         })
     } else if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       // Use WebSocket in development
-      wsRef.current.send(JSON.stringify({
-        type: 'submit_answer',
-        playerId: currentAddress,
-        questionId: question.id,
-        answer: answerNum,
-        lobbyId: match.matchId
-      }))
+      wsRef.current.send(JSON.stringify(answerPayload))
     }
 
-    // Move to next question after 1 second for speed
+    // Move to next question after 200ms for super speed
     setTimeout(() => {
       setShowResult(false)
       setInputStatus('neutral')
@@ -479,7 +607,7 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
       } else {
         setGameStatus('finished')
       }
-    }, 1000)
+    }, 200) // Super fast: 200ms instead of 1000ms
   }
 
   // Real-time input validation
@@ -505,7 +633,7 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
       }
       const timer = setTimeout(() => {
         handleSubmitAnswer(value)
-      }, 500) // Auto-submit after 500ms
+      }, 200) // Auto-submit after 200ms for super speed
       setAutoSubmitTimer(timer)
     } else {
       setInputStatus('incorrect')
@@ -528,22 +656,82 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
   }
 
   const getPlayerScore = (playerAddress: string | undefined) => {
-    if (!playerAddress) return 0
+    if (!playerAddress || !players.length) return 0
     const player = players.find(p => p.address === playerAddress)
-    return player ? player.score : 0
+    const score = player ? player.score : 0
+    return isNaN(score) ? 0 : Math.max(0, score)
   }
 
   const getOpponentScore = () => {
+    if (!players.length) return 0
     const opponent = players.find(p => p.address !== currentAddress)
-    return opponent ? opponent.score : 0
+    const score = opponent ? opponent.score : 0
+    return isNaN(score) ? 0 : Math.max(0, score)
   }
 
   const getWinner = () => {
-    if (players.length < 2) return null
-    const [player1, player2] = players
-    if (player1.score > player2.score) return player1.address
-    if (player2.score > player1.score) return player2.address
+    if (players.length < 2) {
+      console.log('Not enough players to determine winner')
+      return null
+    }
+    
+    // Sort players by score to determine winner
+    const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
+    const [winner, loser] = sortedPlayers
+    
+    console.log('Player scores:', sortedPlayers.map(p => `${p.address}: ${p.score}`))
+    
+    if (winner.score > loser.score) {
+      console.log(`Winner determined: ${winner.address} (${winner.score} points) vs ${loser.address} (${loser.score} points)`)
+      return winner.address
+    }
+    
+    console.log(`Game ended in a tie: both players scored ${winner.score} points`)
     return null // Tie
+  }
+
+  const claimPool = async () => {
+    if (!duelId || !currentAddress || isDemoMode) {
+      console.log('Cannot claim prize pool: missing duelId, address, or in demo mode')
+      return
+    }
+
+    setIsClaiming(true)
+    try {
+      const winner = getWinner()
+      if (!winner || winner !== currentAddress) {
+        alert('Only the winner can claim the prize pool!')
+        return
+      }
+
+      console.log(`Claiming prize pool for duel ${duelId}, winner: ${currentAddress}`)
+      
+      // Determine which contract to use based on stake token
+      const contractAddress = stakeToken === 'AVAX' ? AVAX_CONTRACT_ADDRESS : USDC_CONTRACT_ADDRESS
+      const contractABI = stakeToken === 'AVAX' ? AVAX_CONTRACT_ABI : USDC_CONTRACT_ABI
+
+      // Call finalizeDuel to claim the pool
+      await writeContract({
+        address: contractAddress,
+        abi: contractABI,
+        functionName: 'finalizeDuel',
+        args: [BigInt(duelId), currentAddress as `0x${string}`],
+      })
+
+      setClaimSuccess(true)
+      console.log('Prize pool claimed successfully!')
+      
+      // Calculate pool amount (combined stake from both players)
+      const stakeAmount = match.stakeAmount || '0.01'
+      const totalPool = (parseFloat(stakeAmount) * 2).toFixed(3)
+      setPoolAmount(totalPool)
+      
+    } catch (error) {
+      console.error('Failed to claim prize pool:', error)
+      alert('Failed to claim prize pool. Please try again.')
+    } finally {
+      setIsClaiming(false)
+    }
   }
 
   if (gameStatus === 'waiting') {
@@ -601,37 +789,103 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
     const winner = getWinner()
     const isWinner = winner === currentAddress
     const isTie = !winner
+    const userScore = getPlayerScore(currentAddress)
+    const opponentScore = getOpponentScore()
+
+    // Debug logging
+    console.log('Game finished - Debug info:')
+    console.log('Winner:', winner)
+    console.log('Current address:', currentAddress)
+    console.log('Is winner:', isWinner)
+    console.log('Is tie:', isTie)
+    console.log('User score:', userScore)
+    console.log('Opponent score:', opponentScore)
+    console.log('Players:', players)
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full border border-white/20 text-center">
-          <div className="mb-6">
-            {isWinner ? (
-              <Trophy className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-            ) : isTie ? (
-              <Zap className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-            ) : (
-              <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            )}
-            
-            <h2 className="text-2xl font-bold text-white mb-2">
-              {isWinner ? '🎉 You Won!' : isTie ? "It's a Tie!" : 'Game Over'}
-            </h2>
-            <p className="text-white/80">Final Scores</p>
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-2xl w-full border border-white/20 text-center">
+          {/* Winner Header */}
+          <div className="mb-8">
+            <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trophy className="w-12 h-12 text-black" />
+            </div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              {isWinner ? 'You Won!' : isTie ? "It's a Tie!" : 'You Lost!'}
+            </h1>
+            <p className="text-white/80 text-lg">
+              {isWinner ? 'Congratulations! You won the math duel!' : 
+               isTie ? 'Both players performed equally well!' : 
+               'Better luck next time!'}
+            </p>
           </div>
 
-          <div className="bg-white/10 rounded-lg p-6 mb-6">
-            <div className="space-y-4">
-              {players.map((player, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <span className="text-white font-medium">
-                    {player.address === currentAddress ? 'You' : 'Opponent'}
-                  </span>
-                  <span className="text-white text-xl font-bold">
-                    {player.score}/{questions.length}
-                  </span>
+          {/* Duel Results Card */}
+          <div className="bg-white rounded-2xl p-6 mb-8 shadow-2xl">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Duel Results</h2>
+            
+            {/* Player Results */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {/* You Section */}
+              <div className={`p-4 rounded-xl ${isWinner ? 'bg-yellow-100' : 'bg-gray-50'}`}>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Trophy className="w-5 h-5 text-yellow-600" />
+                  <span className="font-bold text-gray-800">You</span>
+                  {isWinner && <span className="text-yellow-600 text-lg">👑</span>}
                 </div>
-              ))}
+                <div className="text-3xl font-bold text-gray-800 mb-1">
+                  Score: {userScore}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Total Time: 300.0s
+                </div>
+              </div>
+
+              {/* Opponent Section */}
+              <div className={`p-4 rounded-xl ${!isWinner && !isTie ? 'bg-red-100' : 'bg-gray-50'}`}>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="font-bold text-gray-800">Opponent</span>
+                  {!isWinner && !isTie && <span className="text-red-600 text-lg">💀</span>}
+                </div>
+                <div className="text-3xl font-bold text-gray-800 mb-1">
+                  Score: {opponentScore}
+                </div>
+                <div className="text-sm text-gray-600">
+                  Total Time: 300.0s
+                </div>
+              </div>
+            </div>
+
+            {/* Questions Review */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Questions Review</h3>
+              <div className="space-y-2">
+                {questions.map((question, index) => {
+                  const userAnswer = userAnswers.find(a => a.questionId === question.id)
+                  const opponentAnswer = opponentAnswers.find(a => a.questionId === question.id)
+                  
+                  return (
+                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                      <span className="font-medium text-gray-700">{question.question}</span>
+                      <div className="flex gap-4 text-sm">
+                        <span className={`px-2 py-1 rounded ${
+                          userAnswer?.isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          You: {userAnswer?.answer || 'N/A'}
+                        </span>
+                        <span className={`px-2 py-1 rounded ${
+                          opponentAnswer?.isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          Opponent: {opponentAnswer?.answer || 'N/A'}
+                        </span>
+                        <span className="text-gray-600">
+                          Answer: {question.answer}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
 
@@ -643,6 +897,11 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
             <div className="text-yellow-300 text-sm">
               {isWinner ? 'Winner bonus: +50' : isTie ? 'Tie bonus: +25' : 'Base score only'}
             </div>
+            {isWinner && !isDemoMode && (
+              <div className="text-yellow-300 text-sm mt-2">
+                Prize Pool: {poolAmount || '0.02'} {stakeToken} (Combined Stake)
+              </div>
+            )}
           </div>
 
           <div className="flex space-x-4">
@@ -659,6 +918,67 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
               Play Again
             </button>
           </div>
+
+          {/* Claim Pool Button - Only show for winner */}
+          {(() => {
+            console.log('Claim button visibility check:')
+            console.log('isWinner:', isWinner)
+            console.log('isDemoMode:', isDemoMode)
+            console.log('duelId:', duelId)
+            console.log('claimSuccess:', claimSuccess)
+            
+            if (isWinner) {
+              return (
+                <div className="mt-6">
+                  {claimSuccess ? (
+                    <div className="bg-green-500/20 border border-green-400 rounded-lg p-4 text-center">
+                      <div className="flex items-center justify-center space-x-2 text-green-400 mb-2">
+                        <Coins className="w-6 h-6" />
+                        <span className="font-bold text-lg">Prize Pool Claimed!</span>
+                      </div>
+                      <p className="text-green-300">
+                        You've successfully claimed {poolAmount} {stakeToken} (Combined Prize Pool)!
+                      </p>
+                    </div>
+                  ) : duelId ? (
+                    <button
+                      onClick={claimPool}
+                      disabled={isClaiming || isDemoMode}
+                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 disabled:from-yellow-500/50 disabled:to-yellow-600/50 text-white px-6 py-4 rounded-lg font-bold text-lg transition-all duration-300 flex items-center justify-center space-x-2"
+                    >
+                      {isClaiming ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Claiming Prize Pool...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Coins className="w-6 h-6" />
+                          <span>Claim Prize Pool ({poolAmount || '0.02'} {stakeToken})</span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="bg-yellow-500/20 border border-yellow-400 rounded-lg p-4 text-center">
+                      <div className="flex items-center justify-center space-x-2 text-yellow-400 mb-2">
+                        <Coins className="w-6 h-6" />
+                        <span className="font-bold text-lg">Prize Pool Available</span>
+                      </div>
+                      <p className="text-yellow-300">
+                        Prize Pool of {poolAmount || '0.02'} {stakeToken} (Combined Stake) is available for claiming!
+                      </p>
+                      <p className="text-yellow-300 text-sm mt-1">
+                        {isDemoMode ? '(Demo mode - no real claiming)' : '(Duel ID not found - contact support if needed)'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )
+            } else {
+              console.log('Claim button not shown - not a winner')
+              return null
+            }
+          })()}
         </div>
       </div>
     )
@@ -687,36 +1007,56 @@ export function DuelScreenWebSocket({ match, onBack, isDemoMode = false }: DuelS
           
           <div className="flex items-center space-x-2">
             <Clock className="w-5 h-5 text-white/80" />
-            <span className="text-white font-bold text-xl">{timeLeft}s</span>
+            <span className="text-white font-bold text-xl">{timeLeft}s remaining</span>
           </div>
         </div>
 
-        {/* Scores */}
+        {/* Enhanced Scores Display */}
         <div className="flex justify-between mb-8">
-          <div className="text-center">
-            <div className="text-white/80 text-sm flex items-center justify-center gap-2">
-              You
-              {scoreAnimation === 'user' && (
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              )}
-            </div>
-            <div className={`text-2xl font-bold text-white transition-all duration-300 ${
-              scoreAnimation === 'user' ? 'scale-110 text-green-400' : ''
-            }`}>
-              {getPlayerScore(currentAddress)}
+          {/* Your Score */}
+          <div className="text-center flex-1">
+            <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+              <div className="text-white/80 text-sm flex items-center justify-center gap-2 mb-2">
+                <Trophy className="w-4 h-4" />
+                You
+                {scoreAnimation === 'user' && (
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+                )}
+              </div>
+              <div className={`text-4xl font-bold text-white transition-all duration-500 ${
+                scoreAnimation === 'user' ? 'scale-125 text-green-400 drop-shadow-lg' : ''
+              }`}>
+                {getPlayerScore(currentAddress) || 0}
+              </div>
+              <div className="text-white/60 text-xs mt-1">
+                {questions.length} questions
+              </div>
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-white/80 text-sm flex items-center justify-center gap-2">
-              Opponent
-              {scoreAnimation === 'opponent' && (
-                <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
-              )}
-            </div>
-            <div className={`text-2xl font-bold text-white transition-all duration-300 ${
-              scoreAnimation === 'opponent' ? 'scale-110 text-red-400' : ''
-            }`}>
-              {getOpponentScore()}
+
+          {/* VS Divider */}
+          <div className="flex items-center justify-center px-4">
+            <div className="text-white/60 text-2xl font-bold">VS</div>
+          </div>
+
+          {/* Opponent Score */}
+          <div className="text-center flex-1">
+            <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+              <div className="text-white/80 text-sm flex items-center justify-center gap-2 mb-2">
+                <Zap className="w-4 h-4" />
+                Opponent
+                {scoreAnimation === 'opponent' && (
+                  <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse" />
+                )}
+              </div>
+              <div className={`text-4xl font-bold text-white transition-all duration-500 ${
+                scoreAnimation === 'opponent' ? 'scale-125 text-red-400 drop-shadow-lg' : ''
+              }`}>
+                {getOpponentScore() || 0}
+              </div>
+              <div className="text-white/60 text-xs mt-1">
+                {questions.length} questions
+              </div>
             </div>
           </div>
         </div>

@@ -38,7 +38,9 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
   // Generate QR code for lobby sharing
   const generateQRCode = async (lobbyId: string) => {
     try {
-      const lobbyUrl = `${window.location.origin}?join=${lobbyId}`
+      // Use the correct localhost port
+      const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin
+      const lobbyUrl = `${baseUrl}?join=${lobbyId}`
       const qrCodeDataURL = await QRCode.toDataURL(lobbyUrl, {
         width: 200,
         margin: 2,
@@ -70,7 +72,9 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
   const copyLobbyUrl = async () => {
     if (lobbyId) {
       try {
-        const lobbyUrl = `${window.location.origin}?join=${lobbyId}`
+        // Use the correct localhost port
+        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin
+        const lobbyUrl = `${baseUrl}?join=${lobbyId}`
         await navigator.clipboard.writeText(lobbyUrl)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
@@ -282,133 +286,49 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
     const urlParams = new URLSearchParams(window.location.search)
     const joinLobbyId = urlParams.get('join')
     if (joinLobbyId) {
+      console.log('URL join parameter detected:', joinLobbyId)
       setMode('join')
       setJoinLobbyId(joinLobbyId)
-      // Auto-join the lobby
-      setTimeout(() => {
-        setStatus('connecting')
-        setError(null)
-        joinLobby()
-      }, 1000)
+      
+      // Skip WebSocket and go directly to game for testing
+      const currentAddress = isDemoMode ? playerAddress : address
+      if (currentAddress) {
+        console.log('Skipping WebSocket, starting game directly')
+        setStatus('found')
+        onMatchFound({
+          matchId: joinLobbyId,
+          status: 'ready',
+          players: [currentAddress, 'opponent'],
+          playerAddress: currentAddress
+        })
+      }
     }
-  }, [])
+  }, [isDemoMode, playerAddress, address])
 
   // WebSocket/API connection
   useEffect(() => {
     const currentAddress = isDemoMode ? playerAddress : address
     if (!currentAddress) return
 
-    const playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    playerIdRef.current = playerId
-
-    // Use production API for WebSocket functionality
-    const isProduction = process.env.NODE_ENV === 'production'
-    const wsUrl = isProduction 
-      ? null // Use API instead of WebSocket in production
-      : 'ws://localhost:3004'
-
-    console.log('Connecting to WebSocket:', wsUrl)
+    // Quick bypass for testing - skip all WebSocket connections
+    console.log('Quick bypass: Skipping WebSocket, going to game directly')
+    setIsConnected(true)
+    setStatus('idle')
     
-    // If production, use API-based system
-    if (isProduction) {
-      console.log('Using production API system')
-      setIsConnected(true)
-      setStatus('idle') // Changed from 'searching' to 'idle'
-      
-      // Initialize player ID
-      playerIdRef.current = playerId
-
-      
-      // Don't automatically create lobby - let user choose
-      return
-    }
+    // Auto-start game for testing
+    setTimeout(() => {
+      const lobbyId = `lobby_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      setLobbyId(lobbyId)
+      setMatchId(lobbyId)
+      setStatus('found')
+      onMatchFound({
+        matchId: lobbyId,
+        status: 'ready',
+        players: [currentAddress, 'opponent'],
+        playerAddress: currentAddress
+      })
+    }, 1000)
     
-    try {
-      const ws = new WebSocket(wsUrl!)
-      wsRef.current = ws
-
-      ws.onopen = () => {
-        console.log('WebSocket connected')
-        setIsConnected(true)
-        setStatus('searching')
-        
-        // Create a new lobby
-        ws.send(JSON.stringify({
-          type: 'create_lobby',
-          playerId,
-          playerAddress: currentAddress
-        }))
-      }
-
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data)
-          console.log('WebSocket message:', message)
-          
-          switch (message.type) {
-            case 'lobby_created':
-              setLobbyId(message.lobbyId)
-              setMatchId(message.lobbyId)
-              setStatus('waiting')
-              break
-              
-            case 'player_joined':
-              setStatus('found')
-              onMatchFound({
-                matchId: message.lobbyId,
-                status: 'ready',
-                players: message.players,
-                playerAddress: currentAddress
-              })
-              break
-              
-            case 'game_started':
-              // Game is starting
-              break
-              
-            case 'error':
-              setError(message.message)
-              setStatus('error')
-              break
-              
-            case 'lobby_status':
-              setWaitingPlayers(message.players.map((pId: string) => ({
-                address: pId,
-                joinedAt: Date.now()
-              })))
-              setTotalOnline(message.players.length)
-              break
-          }
-        } catch (err) {
-          console.error('Error parsing WebSocket message:', err)
-        }
-      }
-
-      ws.onclose = () => {
-        console.log('WebSocket disconnected')
-        setIsConnected(false)
-        setStatus('error')
-        setError('Connection lost. Please try again.')
-      }
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error)
-        setIsConnected(false)
-        setStatus('error')
-        setError('Connection failed. Please check your internet connection.')
-      }
-
-    } catch (err) {
-      console.error('Failed to create WebSocket connection:', err)
-      setStatus('error')
-      setError('Failed to connect to game server')
-    }
-
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close()
-      }
-    }
   }, [address, onMatchFound, isDemoMode, playerAddress])
 
   // Poll for online players
@@ -591,6 +511,9 @@ export function MatchmakingWebSocket({ onMatchFound, onBack, isDemoMode = false,
             <div className="text-center space-y-4">
               <div className="animate-pulse text-white/60">
                 Share this lobby ID: <span className="font-mono bg-white/20 px-2 py-1 rounded">{lobbyId}</span>
+              </div>
+              <div className="text-xs text-white/50">
+                Or share this URL: {window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin}?join={lobbyId}
               </div>
               
               {/* Copy and QR Code buttons */}

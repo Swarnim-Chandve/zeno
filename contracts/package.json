@@ -8,6 +8,7 @@
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.js --network fuji",
     "deploy:demo": "hardhat run scripts/deploy-demo.js --network fuji",
+    "deploy:avax": "hardhat run scripts/deploy-avax.js --network fuji",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost"
   },
   "devDependencies": {

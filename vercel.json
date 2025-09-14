@@ -13,11 +13,11 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_CONTRACT_ADDRESS": "0x084b724ddF750f05b0d36beD6cc7EB5147a239Cd",
-    "NEXT_PUBLIC_TOKEN_ADDRESS": "0x3C7b30dcbe935233344656c1BA7E53952E5288C9",
+    "NEXT_PUBLIC_CONTRACT_ADDRESS": "0x16F974aaeEa37A5422dF642934E7189E261C67B8",
     "NEXT_PUBLIC_CHAIN_ID": "43113",
     "NEXT_PUBLIC_NETWORK_NAME": "Fuji Testnet",
     "NEXT_PUBLIC_RPC_URL": "https://api.avax-test.network/ext/bc/C/rpc",
-    "NEXT_PUBLIC_BACKEND_URL": "https://math-duel-backend.vercel.app"
+    "NEXT_PUBLIC_BACKEND_URL": "https://math-duel-backend.vercel.app",
+    "NEXT_PUBLIC_WEBSOCKET_URL": "wss://math-duel-backend.vercel.app"
   }
 }
