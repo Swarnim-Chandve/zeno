@@ -58,9 +58,9 @@ function initializeContract(address) {
   }
 }
 
-// Math question generator
+// Enhanced math question generator with all 4 operations
 function generateMathQuestion() {
-  const operations = ['+', '-', '*'];
+  const operations = ['+', '-', '*', '/'];
   const operation = operations[Math.floor(Math.random() * operations.length)];
   
   let num1, num2, answer;
@@ -81,11 +81,20 @@ function generateMathQuestion() {
       num2 = Math.floor(Math.random() * 12) + 1;
       answer = num1 * num2;
       break;
+    case '/':
+      // Generate division problems that result in whole numbers
+      num2 = Math.floor(Math.random() * 10) + 2; // Divisor from 2-11
+      answer = Math.floor(Math.random() * 20) + 1; // Quotient from 1-20
+      num1 = num2 * answer; // Dividend = divisor * quotient
+      break;
   }
   
   return {
     question: `${num1} ${operation} ${num2} = ?`,
     answer: answer,
+    operation: operation,
+    num1: num1,
+    num2: num2,
     id: uuidv4()
   };
 }

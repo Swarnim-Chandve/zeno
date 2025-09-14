@@ -151,6 +151,12 @@ function handleJoinLobby(ws, message) {
   });
   
   console.log(`Player ${playerId} joined lobby ${lobbyId}`);
+  
+  // Auto-start game when both players are in lobby
+  if (lobby.players.length === 2) {
+    console.log(`Both players in lobby ${lobbyId}, starting game automatically`);
+    handleStartGame({ send: (msg) => broadcastToLobby(lobbyId, JSON.parse(msg)) }, { lobbyId });
+  }
 }
 
 function handleCreateLobby(ws, message) {
